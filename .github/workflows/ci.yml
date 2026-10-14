@@ -1,0 +1,25 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.28"
+      - name: uv sync
+        run: uv sync --frozen
+      # No Postgres, no Ollama, no generated data in CI: database, farm-data and
+      # model tests skip by their own conditions; `model` tests are deselected.
+      - name: pytest
+        run: uv run pytest -q -m "not model"
+      - name: import contracts
+        run: uv run lint-imports
+      - name: client-free
+        run: make client-free
