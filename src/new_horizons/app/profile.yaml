@@ -1,0 +1,36 @@
+# Farm profile — the ONLY file that knows scale, period and seed.
+#
+# `farm` is UI chrome + agent persona only; the synthetic databases and the
+# knowledge base say "the Farm" whatever is written here. `market` localizes
+# the synthetic data. Edit this file, then `make mock && make kb`.
+
+farm:
+  name_en: the Farm
+  name_ar: المزرعة
+  logo: assets/brand/horizons-mark.svg
+
+market:
+  currency: EUR
+  faker_locale: en_US              # people and company names
+  ui_locale_ar: ar_AA              # the Arabic UI strings
+  weekend: [5, 6]                  # Python weekday(): Sat, Sun
+  # Overlays indexed on top of the generic corpus, by folder name in
+  # ingest/kb_market/. [] = generic corpus only (see ingest/kb_market/README.md).
+  kb_overlays: []
+
+period:
+  start: 2026-06-01                # first telemetry reading (15-minute cadence)
+  days: 90                         # through 2026-08-29
+
+units:                             # unit_id, plant, location, grow bed m², base air °C
+  - [AQ-01, pepper, greenhouse-A, 29.0, 21.0]
+  - [AQ-02, lettuce, greenhouse-A, 18.0, 19.5]
+  - [AQ-03, tomato, greenhouse-B, 24.0, 22.5]
+  - [AQ-04, basil, rooftop, 12.0, 20.0]
+
+scale:                             # rows per primary table (telemetry is fixed by the cadence)
+  technicians: 8
+  customers: 14
+  suppliers: 9
+
+seed: 2019

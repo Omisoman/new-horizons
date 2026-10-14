@@ -1,0 +1,51 @@
+# Access rules — tool -> allowed roles -> approval gate.
+# Enforced by shared/rules/rbac.py on every A2A task (the JWT `role` field) and
+# by the tier-2 tool loop (sojourner). A denied tool returns an access
+# error — never a silent skip. deploy_staging ALWAYS requires human approval
+# (tier2/approve.py).
+
+roles:
+  - tier1-dev      # OpenCode developer sandbox
+  - ops            # tier-2 ops agent service identity
+  - admin          # human operator
+
+tools:
+  a2a_delegate:            # tier1 -> tier2 task creation
+    roles: [tier1-dev, admin]
+    approval_required: false
+  gitea_pr:
+    roles: [ops, admin]
+    approval_required: false
+  build_run:
+    roles: [ops, admin]
+    approval_required: false
+  evaluate_run:
+    roles: [ops, admin]
+    approval_required: false
+  deploy_staging:
+    roles: [ops, admin]
+    approval_required: true          # submitted -> working -> input-required
+  validate_smoke:
+    roles: [ops, admin]
+    approval_required: false
+  notify:
+    roles: [ops, admin]
+    approval_required: false
+
+# The deploy gate's evaluation: the question-set scorecard on this model must
+# reach this pass rate (tier2/tools/evaluate.py).
+evaluation:
+  model: llama3.1:8b
+  min_pass_rate: 0.75
+
+# Demo-1 analytics tools (single-role, listed for completeness/audit parity).
+analytics_tools:
+  sql_query:          {roles: [analyst], approval_required: false, notes: read-only DB role}
+  kb_search:          {roles: [analyst], approval_required: false}
+  ocr_document:       {roles: [analyst], approval_required: false}
+  unit_status:        {roles: [analyst], approval_required: false}
+  recon_summary:      {roles: [analyst], approval_required: false}
+  reconcile_document: {roles: [analyst], approval_required: false}
+  drift_report:       {roles: [analyst], approval_required: false}
+  pattern_scan:       {roles: [analyst], approval_required: false}
+  audit_trail:        {roles: [analyst], approval_required: false}

@@ -1,0 +1,6 @@
+# Citation keys for this overlay's documents only:
+#   <key>:
+#     source: <file>.md
+#     section: "<n>"
+#     must_contain: ["<a phrase the section must hold>"]
+{}

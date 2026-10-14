@@ -1,0 +1,25 @@
+# new-horizons standalone: Postgres only. Chroma is embedded (data/kb/chroma).
+# Ollama runs on the host; containers reach it at host.docker.internal:11434.
+# sojourner' stack runs this same container and volume (one audit chain).
+services:
+  postgres:
+    image: postgres:16
+    container_name: horizons-postgres
+    environment:
+      POSTGRES_USER: horizons
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-horizons}
+      POSTGRES_DB: horizons
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./src/new_horizons/shared/db/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U horizons"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:
+    name: horizons-pgdata

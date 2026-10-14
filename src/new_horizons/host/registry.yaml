@@ -1,0 +1,10 @@
+# App agents served by host/app.py (`make host` → http://localhost:8502).
+# A tenant = a package with manifest.py (pages, sidebar, isolated Resources) +
+# one entry here. No change to the host. `HOST_ENABLE=id,id` turns on
+# disabled entries for one run.
+- id: analytics
+  package: app
+  enabled: true
+- id: template
+  package: host/_template
+  enabled: false

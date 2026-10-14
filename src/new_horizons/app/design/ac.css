@@ -1,0 +1,414 @@
+/* Agentization Core design system on Streamlit — Inter, three themes (black, white, gray),
+ * English or Arabic (right to left).
+ * Colours ONLY via the --ac-* variables that ui_common.inject_css() derives from the
+ * active theme in design/tokens.json (tests/test_ui.py forbids raw hex here).
+ * Vocabulary (matches the Architect Wizard): 2px bordered cards on the card tone,
+ * uppercase tracked labels, inverted primary buttons, red = discrepancy.
+ * Positions that depend on reading direction are logical (inline-start / -end).
+ * One small script (design/ac-lens.js) places the nav name tag over the hovered square;
+ * hover, tooltips and page state are all CSS. The pointer is the system's own. */
+
+:root { color-scheme: var(--ac-scheme); }
+
+/* ---- base ------------------------------------------------------------------ */
+html, body, [data-testid="stApp"] {
+  font-family: var(--ac-font);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+[data-testid="stApp"] { direction: var(--ac-dir); }
+/* charts, data grids and code read left to right in either language */
+[data-testid="stPlotlyChart"], [data-testid="stDataFrame"], [data-testid="stCode"] { direction: ltr; }
+.ac-mono { direction: ltr; unicode-bidi: isolate; }
+[data-testid="stDecoration"] { display: none; }
+[data-testid="stHeader"] { background: transparent; }
+[data-testid="stMainBlockContainer"] {
+  padding: 3rem 2.5rem 3rem; max-width: 1480px;
+}
+[data-testid="stMarkdownContainer"] p { line-height: 1.55; }
+/* Streamlit pins every element container (and markdown lists) to text-align: left;
+ * `start` is the same in English and puts Arabic text on the right, where it begins */
+[data-testid="stElementContainer"], [data-testid="stMarkdownContainer"] > :is(ul, ol),
+[data-testid="stFileUploaderDropzoneInstructions"] * {
+  text-align: start; }
+hr { border-color: var(--ac-border) !important; }
+
+/* ---- reruns -----------------------------------------------------------------
+ * Streamlit dims every element to a third of its opacity half a second into a
+ * rerun, and pulses a grey skeleton while a component loads. Screens here render
+ * from cache, so both only read as lag: what is on screen stays at full strength
+ * until its replacement arrives. */
+[data-stale="true"],
+[data-testid="stExpander"] :is(details, summary, summary div) {
+  opacity: 1 !important; transition: none !important; }
+[data-testid="stSkeleton"] { background: transparent !important; animation: none !important; }
+
+/* ---- header ------------------------------------------------------------------ */
+.ac-header { display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem 2rem; flex-wrap: wrap; margin: 0 0 1.75rem; }
+.ac-header > div:first-child { flex: 1 1 480px; min-width: 0; }
+.ac-header h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.025em;
+  line-height: 1.2; margin: 0; padding: 0; color: var(--ac-fg); }
+.ac-header .sub { font-size: 16px; line-height: 1.6; color: var(--ac-fg-muted);
+  margin: .5rem 0 0; max-width: 760px; }
+.ac-header .chips { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: flex-end;
+  padding-top: .45rem; }
+
+/* ---- type helpers ---------------------------------------------------------------- */
+.ac-label { font-size: 12px; font-weight: 500; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--ac-fg-muted); }
+.ac-subtle { color: var(--ac-fg-subtle); font-size: 13px; }
+.ac-section { display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin: 2rem 0 .85rem; }
+.ac-section h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+  margin: 0; padding: 0; color: var(--ac-fg); }
+.ac-mono { font-family: var(--ac-mono); font-size: 12.5px; }
+
+/* ---- chips / pills ------------------------------------------------------------------ */
+.ac-chip { display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap;
+  border: 1px solid var(--ac-border-strong); border-radius: 999px; padding: 2px 10px;
+  font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--ac-fg-muted); line-height: 1.6; }
+.ac-chip.strong { border: 2px solid var(--ac-fg); color: var(--ac-fg); }
+.ac-chip.red { border: 2px solid var(--ac-red); color: var(--ac-red); }
+.ac-chip.amber { border: 2px solid var(--ac-amber); color: var(--ac-amber); }
+.ac-chip.solid { background: var(--ac-fg); color: var(--ac-bg); border-color: var(--ac-fg); }
+
+/* ---- cards ---------------------------------------------------------------------------- */
+.ac-grid { display: grid; gap: 1rem; margin: 0 0 1rem; }
+.ac-card { background: var(--ac-card); border: 2px solid var(--ac-border);
+  border-radius: 8px; padding: 1.25rem; min-width: 0; }
+.ac-card .v { font-size: 28px; font-weight: 600; letter-spacing: -0.02em;
+  color: var(--ac-fg); line-height: 1.2; margin-top: .45rem;
+  font-variant-numeric: tabular-nums; }
+.ac-card .s { font-size: 13px; color: var(--ac-fg-subtle); margin-top: .35rem; }
+.ac-card h4 { font-size: 16px; font-weight: 600; margin: 0 0 .4rem; color: var(--ac-fg); }
+.ac-card p { font-size: 14px; line-height: 1.6; color: var(--ac-fg-muted); margin: 0; }
+.ac-card .foot { display: flex; align-items: center; justify-content: space-between;
+  gap: .75rem; margin-top: 1rem; }
+.ac-card.red { border-color: var(--ac-red); }
+.ac-card.flag .v { color: var(--ac-red); }
+
+[class*="st-key-card-"] { background: var(--ac-card); border: 2px solid var(--ac-border) !important;
+  border-radius: 8px !important; }
+/* suggestion cards: the action sits at the end corner, like the Wizard's OPEN */
+[class*="st-key-card-suggest"] { justify-content: space-between; }
+[class*="st-key-card-suggest"] [data-testid="stElementContainer"]:has([data-testid="stButton"]) {
+  align-self: flex-end; width: auto; }
+
+/* ---- alert (discrepancy) --------------------------------------------------------------- */
+.ac-alert { background: var(--ac-card); border: 2px solid var(--ac-red);
+  border-radius: 8px; padding: 1.1rem 1.25rem; margin: .25rem 0 1rem; }
+.ac-alert.amber { border-color: var(--ac-amber); }
+.ac-alert.ok { border-color: var(--ac-border-strong); }
+.ac-alert .head { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+  margin-bottom: .55rem; }
+.ac-alert .head b { font-size: 15px; font-weight: 600; color: var(--ac-fg); }
+.ac-alert p, .ac-alert li { font-size: 14px; line-height: 1.6; color: var(--ac-fg-muted); }
+.ac-alert ul, .ac-alert ol { margin: .3rem 0 0; padding-inline-start: 1.1rem; }
+.ac-alert .cite { font-family: var(--ac-mono); font-size: 12px; color: var(--ac-fg-subtle); }
+
+/* ---- tables & check lists ------------------------------------------------------------------ */
+table.ac-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.ac-table th { color: var(--ac-fg-subtle); font-weight: 500; font-size: 11px;
+  letter-spacing: .05em; text-transform: uppercase; text-align: start;
+  border-bottom: 1px solid var(--ac-border); padding: .55rem .6rem; }
+table.ac-table td { color: var(--ac-fg-muted); padding: .55rem .6rem;
+  border-bottom: 1px solid var(--ac-border); font-variant-numeric: tabular-nums;
+  vertical-align: top; }
+table.ac-table td.ar { direction: rtl; text-align: right; }
+table.ac-table tr.fail td { color: var(--ac-fg); }
+.ac-check { display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  border: 2px solid var(--ac-border-strong); color: var(--ac-fg-muted); }
+.ac-check.pass { border-color: var(--ac-fg); color: var(--ac-fg); }
+.ac-check.fail { border-color: var(--ac-red); color: var(--ac-red); }
+.ac-check.warn { border-color: var(--ac-amber); color: var(--ac-amber); }
+
+/* ---- streamlit widgets ------------------------------------------------------------------------ */
+[data-testid="stBaseButton-primary"], [data-testid="stBaseButton-secondary"],
+[data-testid="stBaseButton-tertiary"] {
+  text-transform: uppercase; letter-spacing: .05em; font-weight: 500;
+  min-height: 40px; transition: opacity .15s, background-color .15s, border-color .15s, transform .15s;
+}
+[data-testid="stBaseButton-primary"] p, [data-testid="stBaseButton-secondary"] p,
+[data-testid="stBaseButton-tertiary"] p { font-size: 12px; font-weight: 500; }
+[data-testid="stBaseButton-primary"] { background: var(--ac-fg); color: var(--ac-bg);
+  border: 1px solid var(--ac-fg); }
+[data-testid="stBaseButton-primary"]:hover { opacity: .9; background: var(--ac-fg);
+  color: var(--ac-bg); border-color: var(--ac-fg); }
+[data-testid="stBaseButton-secondary"] { background: transparent;
+  border: 1px solid var(--ac-border-strong); color: var(--ac-fg); }
+[data-testid="stBaseButton-secondary"]:hover { background: var(--ac-muted);
+  border-color: var(--ac-fg); color: var(--ac-fg); }
+button:active { transform: scale(.98); }
+
+[data-testid="stMetric"] { background: var(--ac-card); border: 2px solid var(--ac-border);
+  border-radius: 8px; padding: 1.1rem 1.25rem; }
+[data-testid="stMetricLabel"] p { font-size: 12px; font-weight: 500; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--ac-fg-muted); }
+
+[role="tablist"] { gap: 1.75rem; }
+[data-testid="stTab"] p { font-size: 12px; font-weight: 500; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--ac-fg-subtle); }
+[data-testid="stTab"][aria-selected="true"] p { color: var(--ac-fg); }
+[data-testid="stTab"]:hover p { color: var(--ac-fg); }
+
+[data-testid="stExpander"] details { border: 2px solid var(--ac-border); border-radius: 8px;
+  background: var(--ac-card); }
+[data-testid="stExpander"] summary p { font-size: 12px; font-weight: 500;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--ac-fg-muted); }
+
+[data-testid="stWidgetLabel"] p { font-size: 12px; font-weight: 500; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--ac-fg-muted); }
+[data-baseweb="select"] > div, [data-testid="stFileUploaderDropzone"] {
+  background: var(--ac-card); border: 2px solid var(--ac-border); border-radius: 8px; }
+[data-testid="stFileUploaderDropzone"]:hover { border-color: var(--ac-fg); }
+
+[data-testid="stChatMessage"] { background: transparent; padding: .9rem 0; gap: .9rem; }
+[data-testid="stChatInput"] > div { background: var(--ac-card);
+  border: 2px solid var(--ac-border); border-radius: 8px; }
+[data-testid="stChatInput"] > div:focus-within { border-color: var(--ac-fg); }
+[data-testid="stBottom"] > div { background: var(--ac-bg); }
+
+div[role="dialog"] { background: var(--ac-card); border: 2px solid var(--ac-border);
+  border-radius: 8px; }
+
+/* a page link dressed as the primary button (one run, where switch_page took two) */
+.st-key-open-chat [data-testid="stPageLink-NavLink"] {
+  display: inline-flex; width: auto; min-height: 40px; padding: 0 1rem; gap: .5rem;
+  background: var(--ac-fg); border: 1px solid var(--ac-fg); border-radius: 6px;
+  color: var(--ac-bg); transition: opacity .15s; }
+.st-key-open-chat [data-testid="stPageLink-NavLink"]:hover { background: var(--ac-fg); opacity: .9; }
+.st-key-open-chat [data-testid="stPageLink-NavLink"] :is(p, [data-testid="stIconMaterial"]) {
+  color: var(--ac-bg) !important; }
+.st-key-open-chat [data-testid="stPageLink-NavLink"] p { margin: 0; font-size: 12px;
+  font-weight: 500; letter-spacing: .05em; text-transform: uppercase; }
+
+/* ---- sidebar ------------------------------------------------------------------------------------ */
+[data-testid="stSidebar"][aria-expanded="true"] { min-width: 336px; max-width: 336px; }
+[data-testid="stSidebar"] { border-inline-end: 1px solid var(--ac-border);
+  --below: 20px; }            /* hairline → buttons, and between the two button rows */
+[data-testid="stSidebarHeader"] { height: 1.25rem; padding: 0; margin: 0; }
+[data-testid="stSidebarUserContent"] { padding: 0 1.1rem 7rem; }   /* clear of the footer band */
+/* collapse / expand controls sit lower, level with the farm logo. `translate`
+ * composes with the press `transform`, so a click never makes them jump back. */
+[data-testid="stSidebarCollapseButton"], [data-testid="stExpandSidebarButton"] {
+  translate: 0 1.6rem; }
+
+/* farm logo band: the logo sits --top below the sidebar's top edge, a short hairline
+ * (fading out at both ends) the same --top below the logo, and the buttons follow the
+ * hairline closer, --below. Streamlit adds its 1.25rem sidebar header above and 1rem
+ * between blocks below, so both margins subtract them. */
+.st-key-farm-logo { --top: 81px; align-items: center; gap: 0;
+  margin: calc(var(--top) - 1.25rem) 0 calc(var(--below) - 1rem); }
+.st-key-farm-logo [data-testid="stImage"], .st-key-farm-logo img { margin: 0 auto; }
+.st-key-farm-logo [data-testid="stElementToolbar"] { display: none; }
+.st-key-farm-logo::after { content: ""; display: block; width: 84%; height: 1px;
+  margin: var(--top) auto 0;
+  background: linear-gradient(90deg, transparent, var(--ac-border-strong) 20%,
+                              var(--ac-border-strong) 80%, transparent); }
+
+/* 3×3 square navigation — icon only; the label is the hover / keyboard-focus tooltip.
+ * Each square is an st.page_link in a keyed wrapper whose key carries its state:
+ * `--current` marks it (the theme's nav-current tokens: inverted on the dark themes,
+ * white with a gray edge on White), `--alert` adds the unread dot. The rows sit --below
+ * apart — the same space as under the hairline. The pointer's name label comes out of
+ * the lens; the bubble below is for keyboard focus only. */
+.st-key-app-nav { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr));
+  row-gap: var(--below) !important; column-gap: 8px !important; }
+.st-key-app-nav > * { min-width: 0; width: auto !important; aspect-ratio: 1 / 1; }
+/* each square fills its cell exactly: Streamlit gives element containers negative
+ * margins and sizes blocks to content, which let a square spill into the next row */
+.st-key-app-nav > * :is([data-testid="stVerticalBlock"], [data-testid="stElementContainer"],
+  [data-testid="stPageLink"], [data-testid="stPageLink"] > div) {
+  height: 100% !important; margin: 0 !important; }
+.st-key-app-nav [data-testid="stPageLink-NavLink"] {
+  position: relative; container-type: inline-size; overflow: visible;
+  width: 100%; height: 100%; margin: 0; padding: 0; gap: 0;
+  justify-content: center; align-items: center;
+  background: var(--ac-card); border: 2px solid var(--ac-border); border-radius: 8px;
+  color: var(--ac-fg-muted); transition: border-color .15s, background-color .15s, color .15s; }
+.st-key-app-nav [data-testid="stPageLink-NavLink"] [data-testid="stIconMaterial"] {
+  font-size: 22px; margin: 0; color: inherit !important; }
+.st-key-app-nav [data-testid="stPageLink-NavLink"]:hover {
+  background: var(--ac-card); border-color: var(--ac-nav-hover); color: var(--ac-fg); }
+.st-key-app-nav [data-testid="stPageLink-NavLink"]:focus-visible {
+  outline: 2px solid var(--ac-nav-hover); outline-offset: 2px; }
+.st-key-app-nav [class*="--current"] [data-testid="stPageLink-NavLink"],
+.st-key-app-nav [class*="--current"] [data-testid="stPageLink-NavLink"]:hover {
+  background: var(--ac-nav-current-bg); border-color: var(--ac-nav-current-border);
+  color: var(--ac-nav-current-fg); }
+.st-key-app-nav [class*="--alert"] [data-testid="stPageLink-NavLink"]::before {
+  content: ""; position: absolute; top: 6px; inset-inline-end: 6px; width: 7px; height: 7px;
+  border-radius: 999px; background: var(--ac-red); }
+
+/* the tooltip: the link's own label on the theme's tip tokens, 20px tall, 6px off the
+ * square — centred in the 32px row gap. The bottom row opens upward, the top row
+ * downward. The caret is two triangles: the edge colour (::before) and the fill 1px
+ * inside it (::after), so a White tooltip keeps its gray outline round the caret.
+ * Edge columns anchor to their outer side, so a long label never leaves the sidebar;
+ * the caret stays centred on the square (50cqw = half the square's content width). */
+.st-key-app-nav [data-testid="stPageLink-NavLink"] [data-testid="stMarkdownContainer"] {
+  position: absolute; left: 50%; bottom: calc(100% + 6px); z-index: 1000;
+  width: max-content; max-width: none;             /* Streamlit caps labels at 100% */
+  height: 20px; box-sizing: border-box; display: flex; align-items: center; padding: 0 8px;
+  border: 1px solid var(--ac-tip-border); border-radius: 5px; white-space: nowrap;
+  pointer-events: none; background: var(--ac-tip-bg); color: var(--ac-tip-fg);
+  opacity: 0; transform: translateX(-50%); transition: opacity .12s; }
+.st-key-app-nav [data-testid="stPageLink-NavLink"] [data-testid="stMarkdownContainer"] p {
+  margin: 0; color: inherit; font-size: 10.5px; font-weight: 600; line-height: 1;
+  letter-spacing: .06em; text-transform: uppercase; }
+.st-key-app-nav [data-testid="stPageLink-NavLink"]:focus-visible [data-testid="stMarkdownContainer"] {
+  opacity: 1; transition-delay: .06s; }
+.st-key-app-nav [data-testid="stMarkdownContainer"]::before,
+.st-key-app-nav [data-testid="stMarkdownContainer"]::after {
+  content: ""; position: absolute; left: 50%; border-style: solid; border-color: transparent; }
+/* lower rows (the default): open upward, caret points down */
+.st-key-app-nav [data-testid="stMarkdownContainer"]::before {
+  top: 100%; margin-left: -5px; border-width: 5px 5px 0; border-top-color: var(--ac-tip-border); }
+.st-key-app-nav [data-testid="stMarkdownContainer"]::after {
+  top: calc(100% - 1px); margin-left: -4px; border-width: 4px 4px 0;
+  border-top-color: var(--ac-tip-bg); }
+/* top row: opens downward into the gap, caret points up */
+.st-key-app-nav > :nth-child(-n+3) [data-testid="stMarkdownContainer"] {
+  bottom: auto; top: calc(100% + 6px); }
+.st-key-app-nav > :nth-child(-n+3) [data-testid="stMarkdownContainer"]::before {
+  top: auto; bottom: 100%; border-width: 0 5px 5px; border-top-color: transparent;
+  border-bottom-color: var(--ac-tip-border); }
+.st-key-app-nav > :nth-child(-n+3) [data-testid="stMarkdownContainer"]::after {
+  top: auto; bottom: calc(100% - 1px); border-width: 0 4px 4px; border-top-color: transparent;
+  border-bottom-color: var(--ac-tip-bg); }
+/* edge columns: the bubble anchors to the outer side, the caret stays on the square */
+.st-key-app-nav > :nth-child(3n+1) [data-testid="stMarkdownContainer"] {
+  left: auto; inset-inline-start: -2px; transform: none; }
+.st-key-app-nav > :nth-child(3n) [data-testid="stMarkdownContainer"] {
+  left: auto; inset-inline-end: -2px; transform: none; }
+.st-key-app-nav > :nth-child(3n+1) [data-testid="stMarkdownContainer"]::before,
+.st-key-app-nav > :nth-child(3n+1) [data-testid="stMarkdownContainer"]::after {
+  left: auto; margin-left: 0; inset-inline-start: calc(50cqw + 2px); }
+.st-key-app-nav > :nth-child(3n+1) [data-testid="stMarkdownContainer"]::before {
+  margin-inline-start: -5px; }
+.st-key-app-nav > :nth-child(3n+1) [data-testid="stMarkdownContainer"]::after {
+  margin-inline-start: -4px; }
+.st-key-app-nav > :nth-child(3n) [data-testid="stMarkdownContainer"]::before,
+.st-key-app-nav > :nth-child(3n) [data-testid="stMarkdownContainer"]::after {
+  left: auto; margin-left: 0; inset-inline-end: calc(50cqw + 2px); }
+.st-key-app-nav > :nth-child(3n) [data-testid="stMarkdownContainer"]::before {
+  margin-inline-end: -5px; }
+.st-key-app-nav > :nth-child(3n) [data-testid="stMarkdownContainer"]::after {
+  margin-inline-end: -4px; }
+@media (prefers-reduced-motion: reduce) {
+  .st-key-app-nav [data-testid="stPageLink-NavLink"],
+  .st-key-app-nav [data-testid="stMarkdownContainer"] { transition: none; }
+}
+
+/* host shell (apps-host): the same square grid, built from buttons */
+.st-key-nav-grid { gap: .6rem; }
+.st-key-nav-grid [data-testid="stHorizontalBlock"] { gap: .6rem; }
+.st-key-nav-grid [data-testid="stColumn"] { min-width: 0; }
+.st-key-nav-grid [data-testid="stButton"] button {
+  width: 100%; aspect-ratio: 1 / 1; height: auto; padding: .4rem .2rem;
+  background: var(--ac-card); border: 2px solid var(--ac-border); border-radius: 8px;
+  color: var(--ac-fg-muted); }
+.st-key-nav-grid [data-testid="stButton"] button > div { width: 100%; }
+.st-key-nav-grid [data-testid="stButton"] button span[data-has-shortcut] {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .5rem; width: 100%; }
+.st-key-nav-grid [data-testid="stButton"] button [data-testid="stIconMaterial"] {
+  font-size: 26px; margin: 0; }
+.st-key-nav-grid [data-testid="stButton"] button p { font-size: 10px;
+  letter-spacing: .045em; margin: 0; white-space: nowrap; }
+.st-key-nav-grid [data-testid="stButton"] button:hover { border-color: var(--ac-fg);
+  color: var(--ac-fg); background: var(--ac-card); }
+.st-key-nav-grid [data-testid="stButton"] button[data-testid="stBaseButton-primary"],
+.st-key-nav-grid [data-testid="stButton"] button[data-testid="stBaseButton-primary"]:hover {
+  background: var(--ac-fg); border-color: var(--ac-fg); color: var(--ac-bg); opacity: 1; }
+
+.ac-model { display: flex; align-items: center; justify-content: space-between;
+  gap: .5rem; margin: .7rem .1rem 0; }
+.ac-model b { font-size: 13px; font-weight: 600; color: var(--ac-fg); }
+.ac-wordmark { position: fixed; bottom: 1.4rem; margin-inline-start: .1rem; opacity: .85; }
+.ac-wordmark img { height: 13px; width: auto; display: block; }
+
+/* footer band: a rule across the whole sidebar and two equal fields split by a
+ * divider, one mark centred in each (ui_common.footer_mark gives every mark the same
+ * ink area inside the same box). Pinned to the sidebar's bottom edge, on the sidebar's
+ * own ground. The geometry is identical on every theme; on White the marks switch to
+ * their gray-ink files. */
+.ac-footer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; height: 88px;
+  display: grid; grid-template-columns: 1fr 1fr;   /* mirrors: a-c holds the screen corner */
+  border-top: 1px solid var(--ac-logo-rule); background: var(--ac-bg); }
+.ac-footer .field { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.ac-footer .field + .field { border-inline-start: 1px solid var(--ac-logo-rule); }
+.ac-footer .mark { display: block; flex: none; overflow: hidden; direction: ltr; }
+.ac-footer .mark img { display: block; max-width: none; }
+/* the band's containing block is the sidebar itself: the Streamlit wrappers around
+ * it are positioned, and would otherwise pin it inside their own small box */
+[data-testid="stSidebarContent"] :has(.ac-footer) { position: static !important; }
+
+/* ---- nav name tag --------------------------------------------------------------------------------
+ * Over a nav square the square's name rises out of the pointer into a glass tag above the
+ * square (design/ac-lens.js only places it); the tag holds still over its square and glides
+ * to the next one, so it neither trails the pointer nor blinks at the gaps. Its glass is the
+ * theme's own ground, frosted — smoked on the dark themes, milky on White — so its ink reads
+ * over anything. The pointer is the system's own: this file sets no pointer style (custom
+ * pointers were tried and flickered). */
+.ac-lens { position: fixed; left: 0; top: 0; z-index: 2147483000; pointer-events: none;
+  box-sizing: border-box; width: max-content; height: 24px; padding: 0 11px;
+  display: flex; align-items: center; white-space: nowrap; border-radius: 12px;
+  direction: var(--ac-dir); color: var(--ac-fg);
+  background: color-mix(in srgb, var(--ac-bg) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ac-fg) 20%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ac-lens-glow) 10%, transparent),
+              0 6px 22px color-mix(in srgb, var(--ac-lens-shadow) 30%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(160%); backdrop-filter: blur(10px) saturate(160%);
+  font: 600 10.5px/1 var(--ac-font); letter-spacing: .06em; text-transform: uppercase;
+  opacity: 0; scale: .3; transition: opacity .12s, scale .12s; }
+.ac-lens.show { opacity: 1; scale: 1;
+  transition: opacity .16s, scale .24s cubic-bezier(.2, .8, .3, 1.12); }
+.ac-lens.show.slide { transition: opacity .16s, scale .24s cubic-bezier(.2, .8, .3, 1.12),
+  translate .2s cubic-bezier(.2, .8, .3, 1); }                /* on to the next square */
+[class*="st-key-ac-lens"] { display: none !important; }  /* the script's carrier element */
+@media (prefers-reduced-motion: reduce) {
+  .ac-lens, .ac-lens.show, .ac-lens.show.slide { transition: none; }
+}
+
+/* ---- settings: theme and language pickers -------------------------------------------------------
+ * Each theme option previews its own theme (the --sw-* colours are set per option by
+ * inject_css from the tokens). The active option takes the nav-current edge. */
+.st-key-theme-picker, .st-key-lang-picker { display: grid !important; gap: .7rem !important; }
+.st-key-theme-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.st-key-lang-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+:is(.st-key-theme-picker, .st-key-lang-picker) > * { min-width: 0; width: auto !important; }
+:is(.st-key-theme-picker, .st-key-lang-picker) [data-testid="stButton"] button {
+  width: 100%; height: auto; background: var(--ac-card);
+  border: 2px solid var(--ac-border); border-radius: 8px; }
+.st-key-theme-picker [data-testid="stButton"] button {
+  flex-direction: column; align-items: stretch; gap: .65rem; padding: .55rem .55rem .7rem; }
+.st-key-theme-picker [data-testid="stButton"] button::before {
+  content: ""; display: block; aspect-ratio: 16 / 10; border-radius: 5px;
+  border: 1px solid var(--ac-border-strong);
+  background:
+    linear-gradient(var(--sw-fg), var(--sw-fg)) 16% 24% / 34% 9% no-repeat,
+    linear-gradient(var(--sw-subtle), var(--sw-subtle)) 16% 42% / 54% 6% no-repeat,
+    linear-gradient(var(--sw-card), var(--sw-card)) 50% 84% / 76% 34% no-repeat,
+    var(--sw-bg); }
+/* each language names itself in its own script: no tracking, no case change */
+.st-key-lang-picker [data-testid="stButton"] button { min-height: 52px; }
+.st-key-lang-picker [data-testid="stButton"] button p {
+  font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+:is(.st-key-theme-picker, .st-key-lang-picker) [data-testid="stButton"] button:hover {
+  background: var(--ac-card); border-color: var(--ac-nav-hover); }
+:is(.st-key-theme-picker, .st-key-lang-picker) [class*="--current"] [data-testid="stButton"] button,
+:is(.st-key-theme-picker, .st-key-lang-picker) [class*="--current"] [data-testid="stButton"] button:hover {
+  border-color: var(--ac-nav-current-border); color: var(--ac-fg); }
+
+/* ---- governance: approval bar, agent state -------------------------------------------- */
+.ac-approval { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+  margin: .2rem 0 .4rem; }
+.ac-agent { display: flex; align-items: center; justify-content: space-between;
+  gap: .5rem; margin: 0 0 .5rem; }
+[class*="st-key-approval-"] { border: 2px solid var(--ac-border); border-radius: 8px;
+  background: var(--ac-card); padding: .7rem .9rem; margin: .4rem 0 .8rem; }
+[class*="st-key-approval-"] [data-testid="stButton"] button { min-height: 34px; }
