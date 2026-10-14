@@ -188,24 +188,31 @@ div[role="dialog"] { background: var(--ac-card); border: 2px solid var(--ac-bord
 /* ---- sidebar ------------------------------------------------------------------------------------ */
 [data-testid="stSidebar"][aria-expanded="true"] { min-width: 336px; max-width: 336px; }
 [data-testid="stSidebar"] { border-inline-end: 1px solid var(--ac-border);
-  --below: 20px; }            /* hairline → buttons, and between the two button rows */
+  --below: 20px;              /* hairline → buttons, and between the two button rows */
+  --sb-pad: 18.75px;          /* the sidebar's two content insets, owned here so the flyby */
+  --sb-user-pad: 1.1rem; }    /* mark can reach 24 px from the sidebar's own edges */
 [data-testid="stSidebarHeader"] { height: 1.25rem; padding: 0; margin: 0; }
-[data-testid="stSidebarUserContent"] { padding: 0 1.1rem 7rem; }   /* clear of the footer band */
+[data-testid="stSidebarContent"] { padding-inline: var(--sb-pad); }   /* Streamlit's default, pinned */
+[data-testid="stSidebarUserContent"] { padding: 0 var(--sb-user-pad) 7rem; }   /* clear of the footer band */
 /* collapse / expand controls sit lower, level with the farm logo. `translate`
  * composes with the press `transform`, so a click never makes them jump back. */
 [data-testid="stSidebarCollapseButton"], [data-testid="stExpandSidebarButton"] {
   translate: 0 1.6rem; }
 
-/* farm logo band: the logo sits --top below the sidebar's top edge, a short hairline
- * (fading out at both ends) the same --top below the logo, and the buttons follow the
- * hairline closer, --below. Streamlit adds its 1.25rem sidebar header above and 1rem
+/* mark band (sidebar-mockup.png): the flyby mark sits --top below the sidebar's top edge,
+ * a short hairline (fading out at both ends) --rule below the mark, and the buttons follow
+ * the hairline closer, --below. Streamlit adds its 1.25rem sidebar header above and 1rem
  * between blocks below, so both margins subtract them. */
-.st-key-farm-logo { --top: 81px; align-items: center; gap: 0;
+.st-key-farm-logo { --top: 42px; --rule: 36px; align-items: center; gap: 0;
   margin: calc(var(--top) - 1.25rem) 0 calc(var(--below) - 1rem); }
-.st-key-farm-logo [data-testid="stImage"], .st-key-farm-logo img { margin: 0 auto; }
-.st-key-farm-logo [data-testid="stElementToolbar"] { display: none; }
+/* the flyby mark: inlined SVG (its own CSS + SMIL animate it), the sidebar's inner width
+ * less 24 px each side — it reaches past the two content insets — height from its 400×150
+ * viewBox. A logo: left to right and tracked in the Arabic UI too (see inject_css). */
+.st-key-farm-logo [data-testid="stMarkdownContainer"] { width: 100%; }
+.ac-flyby { margin-inline: calc(24px - var(--sb-pad) - var(--sb-user-pad)); direction: ltr; }
+.ac-flyby svg { display: block; width: 100%; height: auto; }
 .st-key-farm-logo::after { content: ""; display: block; width: 84%; height: 1px;
-  margin: var(--top) auto 0;
+  margin: var(--rule) auto 0;
   background: linear-gradient(90deg, transparent, var(--ac-border-strong) 20%,
                               var(--ac-border-strong) 80%, transparent); }
 
@@ -331,16 +338,14 @@ div[role="dialog"] { background: var(--ac-card); border: 2px solid var(--ac-bord
 .ac-wordmark { position: fixed; bottom: 1.4rem; margin-inline-start: .1rem; opacity: .85; }
 .ac-wordmark img { height: 13px; width: auto; display: block; }
 
-/* footer band: a rule across the whole sidebar and two equal fields split by a
- * divider, one mark centred in each (ui_common.footer_mark gives every mark the same
- * ink area inside the same box). Pinned to the sidebar's bottom edge, on the sidebar's
- * own ground. The geometry is identical on every theme; on White the marks switch to
- * their gray-ink files. */
+/* footer band: a rule across the whole sidebar and the a-c mark centred in it, alone
+ * (ui_common.footer_mark sizes it to its ink area inside the box). Pinned to the
+ * sidebar's bottom edge, on the sidebar's own ground. The geometry is identical on
+ * every theme; on White the mark switches to its gray-ink file. */
 .ac-footer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; height: 88px;
-  display: grid; grid-template-columns: 1fr 1fr;   /* mirrors: a-c holds the screen corner */
+  display: flex; align-items: center; justify-content: center;   /* one mark, centred */
   border-top: 1px solid var(--ac-logo-rule); background: var(--ac-bg); }
 .ac-footer .field { display: flex; align-items: center; justify-content: center; min-width: 0; }
-.ac-footer .field + .field { border-inline-start: 1px solid var(--ac-logo-rule); }
 .ac-footer .mark { display: block; flex: none; overflow: hidden; direction: ltr; }
 .ac-footer .mark img { display: block; max-width: none; }
 /* the band's containing block is the sidebar itself: the Streamlit wrappers around

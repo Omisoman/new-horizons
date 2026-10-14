@@ -1,5 +1,7 @@
 # new-horizons
 
+<p align="center"><img src="assets/brand/newhorizons-flyby-static.svg" width="400" alt="New Horizons"></p>
+
 **New Horizons** — an offline analytics and reconciliation agent for one aquaponics farm:
 Streamlit + LangGraph on local 8B models, bilingual (English / Arabic), every figure
 traceable to a query or a cited procedure. It is also the home of the shared agent harness

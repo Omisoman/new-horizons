@@ -159,11 +159,13 @@ def test_plotly_template_is_token_driven(theme):
 
 @pytest.mark.parametrize("theme", sorted(THEMES))
 def test_footer_band_geometry_is_the_same_on_every_theme(theme):
-    """Only the files follow the theme (gray ink on White) — the marks never move."""
+    """Only the file follows the theme (gray ink on White) — the a-c mark never moves,
+    and it is alone: the footer carries the builder's mark, nothing else."""
     def no_src(html):
         return re.sub(r"src='[^']*'", "", html)
     html = U.footer_html(theme)
-    assert html.count("class='field'") == len(U.FOOTER_MARKS) == 2
+    assert html.count("class='field'") == len(U.FOOTER_MARKS) == 1 and html.count("<img") == 1
+    assert "ac-mark" in html and "sojourner" not in html
     assert no_src(html) == no_src(U.footer_html(TOKENS["defaultTheme"]))
     light = THEMES[theme]["base"] == "light"
     for _alt, dark_file, light_file, _optical in U.FOOTER_MARKS:
@@ -173,7 +175,7 @@ def test_footer_band_geometry_is_the_same_on_every_theme(theme):
 @pytest.mark.parametrize("surface", (1, 2), ids=("dark-files", "light-files"))
 def test_footer_marks_get_the_same_ink_area(surface):
     """Any mark dropped into static/ is normalised — the same ink area before its
-    small optical scale — and fits the box."""
+    small optical scale — and fits the box (one mark today; the rule holds for more)."""
     marks = [(U.footer_mark(m[surface], m[3]), m[3]) for m in U.FOOTER_MARKS]
     sizes = [(g["w"], g["h"]) for g, _ in marks]
     base_areas = [g["w"] * g["h"] / optical ** 2 for g, optical in marks]
@@ -280,3 +282,14 @@ def test_the_farm_is_named_only_through_the_profile(path):
     for name in (U.PROFILE["farm"]["name_en"], U.PROFILE["farm"]["name_ar"]):
         if name.lower() not in ("the farm", "المزرعة"):
             assert name not in src, f"{path.name} hard-codes the farm's name"
+
+
+@pytest.mark.parametrize("theme", sorted(THEMES))
+def test_sidebar_mark_is_the_inlined_flyby_for_the_theme(theme):
+    """Inline, not an <img>: the SVG's own CSS and SMIL must run. White takes the
+    light file; Black and Gray (dark themes) the dark one."""
+    html = U.logo_html(theme)
+    assert html.startswith("<div class='ac-flyby'><svg") and "<img" not in html
+    want = "newhorizons-flyby-light.svg" if THEMES[theme]["base"] == "light" else "newhorizons-flyby.svg"
+    assert U.farm_logo(theme).name == want
+    assert "animateMotion" in html and ('fill="#1b1b1b"' in html) == (THEMES[theme]["base"] == "light")

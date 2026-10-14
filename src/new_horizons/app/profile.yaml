@@ -7,7 +7,7 @@
 farm:
   name_en: the Farm
   name_ar: المزرعة
-  logo: assets/brand/horizons-mark.svg
+  logo: assets/brand/newhorizons-flyby.svg   # the sidebar's animated mark (scripts/brand-flyby.py)
 
 market:
   currency: EUR

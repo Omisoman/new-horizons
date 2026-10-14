@@ -4,12 +4,12 @@
 
 The AC mark is a gray chevron and pixel letters on a 4.625 px grid (x-height
 5 cells, one ascender pair above, one descender row below). This draws the
-two product marks with the same chevron and the same letterforms — nothing is
-traced, everything is generated from the bitmaps below:
+product's pixel wordmark with the same chevron and the same letterforms — nothing
+is traced, everything is generated from the bitmaps below. The app shell (host/)
+wears it; the analytics app's sidebar wears the flyby mark (scripts/brand-flyby.py).
 
   assets/brand/horizons-mark.svg            › new-horizons (white ink)
   assets/brand/horizons-mark-for-light.svg  same geometry, gray ink (White theme)
-  src/new_horizons/app/static/sojourner-mark{,-for-light}.svg   › sojourner (sidebar footer)
 """
 
 from __future__ import annotations
@@ -79,13 +79,10 @@ def svg(text: str, ink: str, label: str) -> str:
 
 def main() -> None:
     brand = ROOT / "assets" / "brand"
-    static = ROOT / "src" / "new_horizons" / "app" / "static"
     brand.mkdir(parents=True, exist_ok=True)
     targets = {
         brand / "horizons-mark.svg": svg("new-horizons", WHITE, "new-horizons"),
         brand / "horizons-mark-for-light.svg": svg("new-horizons", INK, "new-horizons"),
-        static / "sojourner-mark.svg": svg("sojourner", WHITE, "sojourner"),
-        static / "sojourner-mark-for-light.svg": svg("sojourner", INK, "sojourner"),
     }
     for path, text in targets.items():
         path.write_text(text)

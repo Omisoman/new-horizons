@@ -8,7 +8,7 @@ COMPOSE := docker compose -f docker-compose.yml
 
 MODELS := qwen3:8b llama3.1:8b deepseek-r1:8b qwen3-vl:4b bge-m3
 
-.PHONY: kb-check models db-up db-down mock kb ingest demo1 host llm-target test lint client-free audit-rotate marks
+.PHONY: brand-flyby kb-check models db-up db-down mock kb ingest demo1 host llm-target test lint client-free audit-rotate marks
 
 ## Pull every model the app uses (~20 GB total, one-time).
 models:
@@ -74,9 +74,13 @@ client-free:
 	  --exclude-dir=data --exclude-dir=dist --exclude-dir=.git --exclude=LICENSE . \
 	  && echo "client-free: ok"
 
-## Product marks (assets/brand, footer) from the pixel bitmaps in scripts/brand-marks.py.
+## Product marks (assets/brand) from the pixel bitmaps in scripts/brand-marks.py.
 marks:
 	$(UV) run python scripts/brand-marks.py
+
+## The sidebar's flyby mark: dark, light and static SVGs in assets/brand (scripts/brand-flyby.py).
+brand-flyby:
+	$(UV) run python scripts/brand-flyby.py
 
 ## Rotate the audit chain (needs make db-up): the table is archived intact as
 ## audit_log_archive_<YYYYMMDD>, a new chain starts anchored to it. Never a reset.

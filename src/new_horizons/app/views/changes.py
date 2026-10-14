@@ -1,7 +1,8 @@
-"""Changes — the deploys Sojourner shipped to this app, read from the
-same hash-chained audit log as every decision made here. A change reaches the
-app only after a developer agent built it in a sandbox, an operator agent tested
-and evaluated it, and a person approved it."""
+"""Changes — the deploys shipped to this app, read from the same hash-chained
+audit log as every decision made here. A change reaches the app only after a
+developer agent built it in a sandbox, an operator agent tested and evaluated
+it, and a person approved it. The terminal harness that does this (Sojourner)
+is credited in one place only: the empty state, "Deployed by Sojourner"."""
 
 from datetime import datetime
 
@@ -26,11 +27,11 @@ except Exception as exc:                       # the page renders whatever the d
 
 U.page_header(
     tr("Changes.", "التغييرات."),
-    tr("What Sojourner shipped to this app — each deploy built, tested, evaluated and "
-       "approved by a person, read from the same audit chain as every decision here.",
-       "ما شحنه Sojourner إلى هذا التطبيق — كل نشر بُني واختُبر وقُيّم واعتمده شخص، "
+    tr("What shipped to this app — each deploy built, tested, evaluated and approved by a "
+       "person, read from the same audit chain as every decision here.",
+       "ما شُحن إلى هذا التطبيق — كل نشر بُني واختُبر وقُيّم واعتمده شخص، "
        "ويُقرأ من سلسلة التدقيق نفسها التي تحفظ كل قرار هنا."),
-    [U.chip(tr("Synthetic data", "بيانات تركيبية")), U.chip("Sojourner", "strong"),
+    [U.chip(tr("Synthetic data", "بيانات تركيبية")),
      U.chip(tr(f"{len(rows)} deploy" + ("" if len(rows) == 1 else "s"), f"عمليات النشر: {len(rows)}"))])
 
 if error:
@@ -67,7 +68,8 @@ if not rows:
                        "لم يُشحن أي تغيير إلى هذا التطبيق منذ توليد بياناته. هكذا يصل التغيير إلى هنا:")
             + f"</p><ol>{steps}</ol><p>"
             + tr("Nothing reaches this app without a recorded approval.",
-                 "لا يصل شيء إلى هذا التطبيق دون اعتماد مسجّل.") + "</p>",
+                 "لا يصل شيء إلى هذا التطبيق دون اعتماد مسجّل.") + "</p>"
+            + "<p class='ac-subtle'>" + tr("Deployed by Sojourner", "يُنشر بواسطة Sojourner") + "</p>",
             pill=tr("How a change gets here", "كيف يصل التغيير"), kind="ok")
     st.stop()
 

@@ -216,7 +216,8 @@ def inject_css(theme: str | None = None, lang: str | None = None) -> None:
         f'--sw-fg:{o["colors"]["fg"]};--sw-subtle:{o["colors"]["fgSubtle"]}}}'
         for n, o in THEMES.items())
     # Streamlit pins toasts top-right; in Arabic they open top-left, the start corner
-    arabic = ('[data-testid="stApp"] *,.ac-lens{letter-spacing:0 !important}'
+    # (the flyby mark is a logo: it keeps its tracking in Arabic)
+    arabic = ('[data-testid="stApp"] *:not(.ac-flyby *),.ac-lens{letter-spacing:0 !important}'
               '[data-testid="stSidebar"][aria-expanded="false"]{transform:translateX(600px)}'
               '[data-testid="stToastContainer"].stToastContainer{right:auto;left:0}'
               if code == "ar" else "")
@@ -796,23 +797,33 @@ def nav_label(key: str) -> str:
 
 
 STATIC = APP / "static"
-FOOTER_MARKS = (  # (alt, dark file, light file, optical scale) in static/: corner field first
+FOOTER_MARKS = (  # (alt, dark file, light file, optical scale) in static/
     ("agentization-core", "ac-mark.svg", "ac-mark-for-light.svg", 0.92),
-    ("sojourner", "sojourner-mark.svg", "sojourner-mark-for-light.svg", 0.92),
-)  # builder, then the sibling that develops this app (its deploys are the Changes page).
-   # Light files carry gray ink (AC's from the website's brand assets, sojourner's from
-   # scripts/brand-marks.py); the scale corrects equal ink area optically.
+)  # the builder's mark, alone and centred. The light file carries gray ink (from the
+   # website's brand assets); the scale corrects its ink area optically.
 MARK_AREA = 2200       # px² of ink per footer mark before its optical scale
-MARK_BOX = (132, 52)   # the most one mark may occupy inside its field (a 9-letter wordmark needs ~130)
+MARK_BOX = (120, 52)   # the most one mark may occupy inside the band
 
 
 def farm_logo(theme: str | None = None) -> Path:
-    """The farm's logo (profile.yaml): an SVG whose viewBox is its ink. On a light
-    theme its `-for-light` twin (gray ink) when there is one — White carries no
-    white-on-black marks."""
+    """The sidebar's mark (profile.yaml `farm.logo`): the animated flyby SVG. On a
+    light theme its `-light` twin (dark ink, white terminator) — White carries no
+    white-on-black marks. Gray is a dark theme and keeps the dark file."""
     logo = ROOT / PROFILE["farm"]["logo"]
-    light = logo.with_name(f"{logo.stem}-for-light{logo.suffix}")
+    light = logo.with_name(f"{logo.stem}-light{logo.suffix}")
     return light if THEMES[theme or current_theme()]["base"] == "light" and light.exists() else logo
+
+
+def logo_html(theme: str | None = None) -> str:
+    """The mark INLINED, not an <img>: its CSS keyframes and SMIL probe run in the
+    page, `prefers-reduced-motion` stills them, and it scales to the band (ac.css)."""
+    path = farm_logo(theme)
+    return f"<div class='ac-flyby'>{_svg_at(str(path), path.stat().st_mtime_ns)}</div>"
+
+
+@lru_cache(maxsize=4)
+def _svg_at(path: str, _mtime_ns: int) -> str:
+    return Path(path).read_text(encoding="utf-8").strip()
 
 
 def footer_mark(name: str, optical: float = 1.0) -> dict:
@@ -849,10 +860,9 @@ def _mark_geometry(name: str, _mtime_ns: int, optical: float) -> dict:
 
 
 def footer_html(theme: str | None = None) -> str:
-    """The footer band: a rule across the sidebar and two equal fields split by a
-    divider, each mark centred in its field at the same ink area. The geometry
-    never changes with the theme; on a light theme the marks use their gray-ink
-    files, since their own white ink would vanish."""
+    """The footer band: a rule across the sidebar and the a-c mark centred in it.
+    The geometry never changes with the theme; on a light theme the mark uses its
+    gray-ink file, since its own white ink would vanish."""
     light = THEMES[theme or current_theme()]["base"] == "light"
     fields = []
     for alt, dark_file, light_file, optical in FOOTER_MARKS:
@@ -865,7 +875,7 @@ def footer_html(theme: str | None = None) -> str:
 
 
 def sidebar(pages: dict, current_key: str) -> None:
-    """Farm logo → 3×3 icon navigation (seven analysis pages, Admin center,
+    """The flyby mark → 3×3 icon navigation (seven analysis pages, Admin center,
     Settings) → the footer band. Each square is an st.page_link in a wrapper
     whose key carries its state (`--current`, `--alert`) for design/ac.css."""
     if current_key == "chat":                 # alerts are read once Chat is open
@@ -874,7 +884,7 @@ def sidebar(pages: dict, current_key: str) -> None:
     unread = len(st.session_state.get("unread_alerts", []))
     with st.sidebar:
         with st.container(key="farm-logo"):
-            st.image(str(farm_logo()), width=220)
+            st.markdown(logo_html(), unsafe_allow_html=True)
         with st.container(key="app-nav"):
             for key, _label, icon, _ in NAV + NAV_EXTRA:
                 alert_dot = key == "chat" and unread > 0

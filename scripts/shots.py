@@ -4,6 +4,7 @@
     uv run python scripts/shots.py --port 8502 --out docs/shots/host overview chat
     uv run python scripts/shots.py chat --ask "…"            # chat after an answer
     uv run python scripts/shots.py chat --ask "…" --compare  # -> chat-compare.png
+    uv run python scripts/shots.py overview --sidebar --theme white --lang ar --settle 6 --name sidebar-ar
 
 Chrome's own --screenshot flag can't wait for Streamlit (the app renders over
 a websocket after `load`, and --virtual-time-budget never settles on an open
@@ -28,6 +29,7 @@ from pathlib import Path
 from websockets.sync.client import connect
 
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+ROOT = Path(__file__).resolve().parents[1]
 PAGES = ["overview", "reconcile", "drift", "patterns", "documents", "chat", "changes", "admin", "settings"]
 READY_JS = ("!!document.querySelector('.ac-header') && "
             "!document.querySelector('[data-testid=\"stSpinner\"]')")
@@ -48,7 +50,18 @@ def main() -> int:
     ap.add_argument("--timeout", type=float, default=60.0)
     ap.add_argument("--ask", help="chat page: submit this question, wait for the answer")
     ap.add_argument("--compare", action="store_true", help="with --ask: compare mode on")
+    ap.add_argument("--sidebar", action="store_true", help="capture the sidebar only")
+    ap.add_argument("--theme", help="black | white | gray, for this capture (settings restored after)")
+    ap.add_argument("--lang", help="en | ar, for this capture (settings restored after)")
+    ap.add_argument("--name", help="file stem for a single page (default: the page name)")
     a = ap.parse_args()
+    settings = ROOT / "data" / "ui_settings.json"
+    saved = settings.read_text() if settings.exists() else None
+    if a.theme or a.lang:                 # app-wide settings: the app reads them on every run
+        cur = json.loads(saved) if saved else {}
+        cur.update({k: v for k, v in (("theme", a.theme), ("lang", a.lang)) if v})
+        settings.parent.mkdir(parents=True, exist_ok=True)
+        settings.write_text(json.dumps(cur, indent=1, ensure_ascii=False))
     width, height = map(int, a.size.split("x"))
     a.out.mkdir(parents=True, exist_ok=True)
 
@@ -109,10 +122,24 @@ def main() -> int:
                     want = 2 if a.compare else 1
                     ready = wait(ANSWERS_JS, lambda n: (n or 0) >= want, 300)
                 time.sleep(a.settle)
-                png = cdp("Page.captureScreenshot", format="png")["data"]
+                if a.name and len(a.pages) == 1:
+                    stem = a.name
+                clip = {}
+                if a.sidebar:
+                    box = cdp("Runtime.evaluate", returnByValue=True, expression=(
+                        "(() => {const r = document.querySelector('[data-testid=stSidebar]')"
+                        ".getBoundingClientRect(); return [r.x, r.y, r.width, r.height]})()"))
+                    x, y, w, h = box["result"]["value"]
+                    clip = {"clip": {"x": x, "y": y, "width": w, "height": h, "scale": 1}}
+                png = cdp("Page.captureScreenshot", format="png", **clip)["data"]
                 (a.out / f"{stem}.png").write_bytes(base64.b64decode(png))
                 print(f"{stem:14s} {'ok' if ready else 'TIMEOUT'} -> {a.out / (stem + '.png')}")
     finally:
+        if a.theme or a.lang:
+            if saved is None:
+                settings.unlink(missing_ok=True)
+            else:
+                settings.write_text(saved)
         chrome.terminate()
         chrome.wait(timeout=10)
         shutil.rmtree(profile, ignore_errors=True)
