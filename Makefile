@@ -1,5 +1,5 @@
 # new-horizons — one Makefile, all entry points.
-# Never run `make demo1` and sojourner' tier stack together (16 GB budget).
+# Never run `make demo1` and Sojourner's tier stack together (16 GB budget).
 
 SHELL := /bin/zsh
 UV    ?= uv
@@ -31,6 +31,7 @@ mock:
 	$(UV) run python -m new_horizons.app.mock.generate
 	@for a in drift patterns recon; do \
 	  $(UV) run python -m new_horizons.app.analytics.$$a > /dev/null && echo "  analytics: $$a"; done
+	$(UV) run python -m new_horizons.app.intake.samples
 
 ## Knowledge base: the Farm's corpus -> bge-m3 -> Chroma in data/kb/ (~5 s).
 kb:

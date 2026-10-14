@@ -88,6 +88,27 @@ def set_agent_state(active: bool, actor: str, reason: str | None = None) -> str:
     return audit(actor, "agent_state", {"active": bool(active), "reason": reason})
 
 
+# ---- deploys: what sojourner shipped to this app ---------------------------
+# One chain: tier-2 writes each approved deploy here, the app's Changes page reads it.
+
+DEPLOY_SOURCE = "sojourner"
+
+
+def record_deploy(ref: str, approved_by: str, task_id: str, actor: str = "sojourner-tier2",
+                  **detail) -> str:
+    """One approved deploy: the commit `ref` that reached staging, the person who
+    approved it and the A2A task it came from; `detail` adds summary, files, the
+    evaluation and the staging URL."""
+    return audit(actor, "deploy", {"source": DEPLOY_SOURCE, "kind": "deploy", "ref": ref,
+                                   "approved_by": approved_by, "task_id": task_id, **detail})
+
+
+def deploys(limit: int = 100) -> list[dict]:
+    """Newest-first deploy events written by sojourner (payload source = sojourner)."""
+    return _rows("SELECT id, ts, actor, payload, hash FROM audit_log WHERE event_type = 'deploy'"
+                 " AND payload->>'source' = %s ORDER BY id DESC LIMIT %s", (DEPLOY_SOURCE, int(limit)))
+
+
 def _rows(sql: str, params: tuple = ()) -> list[dict]:
     import psycopg
     with psycopg.connect(_dsn()) as conn, conn.cursor() as cur:

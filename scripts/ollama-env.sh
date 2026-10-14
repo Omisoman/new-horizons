@@ -8,5 +8,5 @@ export OLLAMA_KEEP_ALIVE=10m
 # ignores per-request `options`, so the server default IS the contract.
 export OLLAMA_CONTEXT_LENGTH=8192
 # Containers reach the host at host.docker.internal — ollama must listen
-# beyond loopback for sojourner' tiers (host firewall still applies on the LAN).
+# beyond loopback for Sojourner's tiers (host firewall still applies on the LAN).
 export OLLAMA_HOST=0.0.0.0

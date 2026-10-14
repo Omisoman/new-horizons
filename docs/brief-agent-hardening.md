@@ -87,7 +87,7 @@ English, `يورو` in Arabic. Every figure is ground truth from the generator
 (`ingest/validation/expected-results.json`).
 
 Run it: `uv run python scripts/question-bank.py --set docs/question-set.yaml
-[--model llama3.1:8b]`. sojourner' evaluation gate runs the same set
+[--model llama3.1:8b]`. Sojourner's evaluation gate runs the same set
 on `llama3.1:8b` before a deploy may be approved.
 
 ## Constraints that held

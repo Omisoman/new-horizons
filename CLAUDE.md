@@ -75,7 +75,7 @@ Built for one MacBook Pro, 16 GB. MIT, synthetic, seeded (`seed: 2019`).
 - **Never imply local inference when a remote lane is active.**
 - **Memory budget**: one 8B chat model resident; `qwen3-vl:4b` on demand with
   `keep_alive: 0`; `num_ctx` 8192 (`OLLAMA_CONTEXT_LENGTH`); KV cache q8_0.
-- **Sequencing**: never run `make demo1` and sojourner' tier stack together.
+- **Sequencing**: never run `make demo1` and Sojourner's tier stack together.
   Postgres alone is fine — both use the same container and volume.
 - **Tool calling**: JSON tool protocol only (`shared/harness/protocol.py`) — never
   `bind_tools`; the graph runs identically on qwen3:8b, llama3.1:8b and deepseek-r1:8b.

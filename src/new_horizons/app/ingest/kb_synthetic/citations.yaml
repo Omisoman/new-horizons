@@ -116,3 +116,15 @@ preventive_service:
   source: pump-maintenance-sop.md
   section: "2"
   must_contain: ["monthly", "work order"]
+payment_terms:
+  source: supplier-invoice-controls.md
+  section: "5"
+  must_contain: ["30 days"]
+doc_intake:
+  source: supplier-invoice-controls.md
+  section: "6"
+  must_contain: ["reconciles", "hold"]
+lab_reference:
+  source: sensor-calibration.md
+  section: "5"
+  must_contain: ["0.2", "lab report"]

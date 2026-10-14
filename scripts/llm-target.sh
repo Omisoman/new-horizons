@@ -13,7 +13,7 @@ cd "$(dirname "$0")/.."
 
 MODE="${1:-}"
 ENV_FILE=.env
-# sojourner' tier env files, when the sibling checkout is there
+# Sojourner's tier env files, when the sibling checkout is there
 SOJOURNER="${SOJOURNER_DIR:-../sojourner}"
 T1="$SOJOURNER/infra/compose/tier1.env"
 T2="$SOJOURNER/infra/compose/tier2.env"

@@ -9,7 +9,7 @@ language (shared.text.lang, the same check the harness enforces), every
 must-include figure, the expected citation, and whether a known question was
 answered by its metric intent. A question passes when its language, figures and
 citation are all right. Writes dist/question-set-results-<model>.json (with the
-pass rate sojourner' evaluation gate reads) and prints a table.
+pass rate Sojourner's evaluation gate reads) and prints a table.
 """
 
 from __future__ import annotations

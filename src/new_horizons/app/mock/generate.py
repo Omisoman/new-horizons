@@ -437,6 +437,11 @@ def supplies(rng: random.Random, sim: dict, wo_rows: list) -> dict:
 
 # ---- ground truth -----------------------------------------------------------------
 
+def _plain(v):
+    """A profile value as JSON: dates as ISO text, numbers and mappings as they are."""
+    return v if isinstance(v, (int, float, dict, list)) and not isinstance(v, bool) else str(v)
+
+
 def truth(sim: dict, people_: dict, maint: dict, harv: dict, sup: dict, wo_rows: list) -> dict:
     names = {code: name for _i, code, name, *_ in people_["technicians"]}
     plants = {u: p for u, p, *_ in UNITS}
@@ -570,13 +575,13 @@ def truth(sim: dict, people_: dict, maint: dict, harv: dict, sup: dict, wo_rows:
                          "consumed_not_purchased": feed_qty},
                   "eur_total": round(pump_eur + ghost_eur + feed_eur, 2)},
         "document_intake": {
-            "held": {**{k: str(v) for k, v in held.items()}, "agreed_unit_price": float(held_po[7]),
+            "held": {**{k: _plain(v) for k, v in held.items()}, "agreed_unit_price": float(held_po[7]),
                      "received": str(held_po[3]), "qty": float(held_po[6]),
                      "invoice_total": round(float(held["qty"]) * float(held["invoice_unit_price"]), 2),
                      "po_total": float(held_po[8])},
-            "clean": {**{k: str(v) for k, v in DI["clean"].items()}, "unit_price": float(clean_po[7]),
+            "clean": {**{k: _plain(v) for k, v in DI["clean"].items()}, "unit_price": float(clean_po[7]),
                       "received": str(clean_po[3]), "qty": float(clean_po[6]), "po_total": float(clean_po[8])},
-            "lab": {**{k: str(v) for k, v in lab.items()}, "lab_ph": lab_true, "probe_ph": lab_probe},
+            "lab": {**{k: _plain(v) for k, v in lab.items()}, "lab_ph": lab_true, "probe_ph": lab_probe},
         },
     }
 

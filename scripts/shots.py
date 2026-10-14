@@ -31,8 +31,9 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 PAGES = ["overview", "reconcile", "drift", "patterns", "documents", "chat", "changes", "admin", "settings"]
 READY_JS = ("!!document.querySelector('.ac-header') && "
             "!document.querySelector('[data-testid=\"stSpinner\"]')")
-ANSWERS_JS = ("[...document.querySelectorAll('[data-testid=\"stCaptionContainer\"]')]"
-              ".filter(e => e.innerText.includes('citations:')).length")
+# an answer is rendered when its trace expander ("Trace · …" / "التتبع · …") is on the page
+ANSWERS_JS = ("[...document.querySelectorAll('[data-testid=\"stExpander\"] summary')]"
+              ".filter(e => /trace ·|التتبع ·/i.test(e.innerText)).length")
 TOGGLE_JS = "document.querySelector('[data-testid=\"stSidebar\"] input[type=\"checkbox\"]').click()"
 INPUT_JS = "document.querySelector('textarea[data-testid=\"stChatInputTextArea\"]').focus()"
 

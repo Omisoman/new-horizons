@@ -1,7 +1,7 @@
 """The question set is well-formed — static checks, no model, no database.
 
 docs/question-set.yaml is what the room hears and what the scorecard (and
-sojourner' evaluation gate) grades, so its own expected answers must
+Sojourner's evaluation gate) grades, so its own expected answers must
 pass the rules the agent is held to: the language of the question, the figures
 it must carry, citations that exist.
 """

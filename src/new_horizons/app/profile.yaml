@@ -82,4 +82,6 @@ document_intake:
     report_no: LAB-2026-0019
     unit: AQ-04
     sampled: 2026-08-19T09:00
-    lab_name: the Farm's contract water laboratory
+    lab_name: Contract Water Laboratory
+    results: {ammonia_mg_l: 0.12, nitrite_mg_l: 0.08, nitrate_mg_l: 42.0, iron_mg_l: 2.4}
+                                   # pH is the water's true value at the sample time (generator)

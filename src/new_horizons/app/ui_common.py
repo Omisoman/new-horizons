@@ -597,10 +597,10 @@ def approval_bar(subject: str, label: str, rule: str | None = None,
 
 _EVENT_LABEL = {"model_call": "model call", "tool_call": "tool call", "retrieve": "retrieval",
                 "answer": "answer", "intake_step": "intake step", "decision": "decision",
-                "agent_state": "agent state"}
+                "agent_state": "agent state", "deploy": "deploy"}
 _EVENT_LABEL_AR = {"model_call": "استدعاء نموذج", "tool_call": "استدعاء أداة",
                    "retrieve": "استرجاع", "answer": "إجابة", "intake_step": "خطوة استلام",
-                   "decision": "قرار", "agent_state": "حالة الوكيل"}
+                   "decision": "قرار", "agent_state": "حالة الوكيل", "deploy": "نشر"}
 
 
 def _event_row(e: dict) -> tuple:
@@ -612,6 +612,10 @@ def _event_row(e: dict) -> tuple:
         outcome = decision_chip(p.get("decision", ""))[0]
     elif etype == "agent_state":
         outcome = tr("resumed", "استؤنف") if p.get("active") else tr("paused", "أُوقف")
+    elif etype == "deploy":
+        subject = p.get("ref") or subject
+        outcome = tr(f"deployed · approved by {p.get('approved_by')}",
+                     f"نُشر · اعتمده {p.get('approved_by')}")
     elif etype == "chain_carried":
         # a rotation's checkpoint (shared/audit/rotate.py): state carried from the archive
         n = int((p.get("counts") or {}).get("decision", 0))

@@ -164,7 +164,7 @@
       "ordered": "2026-08-24",
       "supplier_ref": "SUP-001",
       "invoice_supplier_ref": "SUP-007",
-      "invoice_unit_price": "2.95",
+      "invoice_unit_price": 2.95,
       "invoice_date": "2026-08-27",
       "agreed_unit_price": 2.4,
       "received": "2026-08-25",
@@ -187,7 +187,13 @@
       "report_no": "LAB-2026-0019",
       "unit": "AQ-04",
       "sampled": "2026-08-19T09:00",
-      "lab_name": "the Farm's contract water laboratory",
+      "lab_name": "Contract Water Laboratory",
+      "results": {
+        "ammonia_mg_l": 0.12,
+        "nitrite_mg_l": 0.08,
+        "nitrate_mg_l": 42.0,
+        "iron_mg_l": 2.4
+      },
       "lab_ph": 6.89,
       "probe_ph": 7.28
     }

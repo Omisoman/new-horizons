@@ -1,6 +1,6 @@
 # new-horizons standalone: Postgres only. Chroma is embedded (data/kb/chroma).
 # Ollama runs on the host; containers reach it at host.docker.internal:11434.
-# sojourner' stack runs this same container and volume (one audit chain).
+# Sojourner's stack runs this same container and volume (one audit chain).
 services:
   postgres:
     image: postgres:16
