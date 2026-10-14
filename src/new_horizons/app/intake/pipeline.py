@@ -30,9 +30,9 @@ from pathlib import Path
 
 import yaml
 
-from new_horizons.paths import APP, DATA, ROOT
+from new_horizons.paths import APP, DATA, data_path
 
-KB_DIR = ROOT / os.environ.get("KB_DIR", "data/kb")
+KB_DIR = data_path(os.environ.get("KB_DIR"), "kb")
 CACHE = DATA / "intake_cache"
 CITATIONS = yaml.safe_load((APP / "ingest" / "kb_synthetic" / "citations.yaml").read_text(encoding="utf-8"))
 PROFILE = yaml.safe_load((APP / "profile.yaml").read_text(encoding="utf-8"))

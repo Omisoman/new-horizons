@@ -31,7 +31,7 @@ U.page_header(
        "ما شحنه sojourner إلى هذا التطبيق — كل نشر بُني واختُبر وقُيّم واعتمده شخص، "
        "ويُقرأ من سلسلة التدقيق نفسها التي تحفظ كل قرار هنا."),
     [U.chip(tr("Synthetic data", "بيانات تركيبية")), U.chip("sojourner", "strong"),
-     U.chip(tr(f"{len(rows)} deploys", f"{len(rows)} عمليات نشر"))])
+     U.chip(tr(f"{len(rows)} deploy" + ("" if len(rows) == 1 else "s"), f"عمليات النشر: {len(rows)}"))])
 
 if error:
     U.alert(tr("Audit log unreachable", "تعذّر الوصول إلى سجل التدقيق"), f"<p>{error}</p>",
@@ -82,7 +82,7 @@ lp = last["payload"] or {}
 evaluation = lp.get("evaluation") or {}
 U.stat_cards([
     (tr("Deploys", "عمليات النشر"), f"{len(rows)}", tr("approved and shipped", "معتمدة ومشحونة")),
-    (tr("Last deploy", "آخر نشر"), lp.get("ref") or "—", _when(last["ts"])),
+    (tr("Last deploy", "آخر نشر"), (lp.get("ref") or "—")[:12], _when(last["ts"])),
     (tr("Approved by", "اعتمده"), lp.get("approved_by") or "—",
      tr(f"task {str(lp.get('task_id') or '—')[:8]}", f"المهمة {str(lp.get('task_id') or '—')[:8]}")),
     (tr("Evaluation", "التقييم"),
@@ -92,7 +92,7 @@ U.stat_cards([
 
 U.section(tr("Deploys", "عمليات النشر"), tr("newest first · from the audit chain", "الأحدث أولاً · من سلسلة التدقيق"))
 table = pd.DataFrame([{
-    "when": _when(r["ts"]), "ref": (r["payload"] or {}).get("ref"),
+    "when": _when(r["ts"]), "ref": ((r["payload"] or {}).get("ref") or "")[:12],
     "summary": (r["payload"] or {}).get("summary") or "",
     "approved_by": (r["payload"] or {}).get("approved_by"),
     "task": str((r["payload"] or {}).get("task_id") or "")[:8],

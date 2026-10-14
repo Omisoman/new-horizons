@@ -13,6 +13,8 @@ the build skips it, and skips its citation keys with it.
 
 Outputs: data/kb/chroma/ (collection farm_kb), chunks.jsonl, stats.json.
 Skips when the templated corpus is unchanged (content hash) unless --force.
+`--dry-run` (`make kb-check`, Sojourner's validate gate) templates and
+chunks the corpus and resolves every citation key, embedding and writing nothing.
 """
 
 from __future__ import annotations
@@ -30,11 +32,11 @@ import yaml
 from dotenv import load_dotenv
 
 from new_horizons.app.ingest.chunker import chunk_markdown, front_matter
-from new_horizons.paths import APP, ROOT
+from new_horizons.paths import APP, ROOT, data_path
 
 load_dotenv(ROOT / ".env")
 
-KB_DIR = ROOT / os.environ.get("KB_DIR", "data/kb")
+KB_DIR = data_path(os.environ.get("KB_DIR"), "kb")
 CORPUS = Path(__file__).parent / "kb_synthetic"
 OVERLAYS = Path(__file__).parent / "kb_market"
 PROFILE = APP / "profile.yaml"
@@ -136,6 +138,27 @@ def corpus_hash(corpus: list[tuple[str, str, str]]) -> str:
     return h.hexdigest()[:16]
 
 
+def check() -> dict:
+    """The dry run: every live citation key must name a chunked section whose
+    text carries each of its must_contain terms. No model, no writes."""
+    corpus = load_corpus()
+    chunks = build_chunks(corpus)
+    text: dict[tuple[str, str], str] = {}
+    for c in chunks:
+        key = (c["meta"]["source"], c["meta"]["section"])
+        text[key] = text.get(key, "") + "\n" + c["text"]
+    problems = []
+    for key, entry in load_registry().items():
+        body = text.get((entry["source"], str(entry["section"])))
+        if body is None:
+            problems.append(f"{key}: {entry['source']} §{entry['section']} is not in the corpus")
+            continue
+        problems += [f"{key}: {entry['source']} §{entry['section']} lacks {term!r}"
+                     for term in entry.get("must_contain", []) if term not in body]
+    return {"ok": not problems, "docs": len(corpus), "chunks": len(chunks),
+            "citation_keys": len(load_registry()), "problems": problems}
+
+
 def build(force: bool = False) -> dict:
     from new_horizons.shared.kb.store import COLLECTION, KB
     t0 = time.time()
@@ -198,7 +221,16 @@ def build(force: bool = False) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     ap.add_argument("--force", action="store_true", help="rebuild even if unchanged")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="chunk the corpus and resolve every citation key; embed and write nothing")
     args = ap.parse_args()
+    if args.dry_run:
+        c = check()
+        print(f"kb check: {c['docs']} docs, {c['chunks']} chunks, {c['citation_keys']} citation keys — "
+              f"{'ok' if c['ok'] else f'{len(c["problems"])} problems'}")
+        for problem in c["problems"]:
+            print(f"  {problem}")
+        raise SystemExit(0 if c["ok"] else 1)
     s = build(force=args.force)
     print(f"kb: {s['docs']} docs, {s['chunks']} chunks, {s['sections']} sections, "
           f"{s.get('citation_keys', 0)} citation keys in {s['elapsed_s']}s -> {KB_DIR}")

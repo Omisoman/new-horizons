@@ -8,7 +8,7 @@ COMPOSE := docker compose -f docker-compose.yml
 
 MODELS := qwen3:8b llama3.1:8b deepseek-r1:8b qwen3-vl:4b bge-m3
 
-.PHONY: models db-up db-down mock kb ingest demo1 host llm-target test lint client-free audit-rotate marks
+.PHONY: kb-check models db-up db-down mock kb ingest demo1 host llm-target test lint client-free audit-rotate marks
 
 ## Pull every model the app uses (~20 GB total, one-time).
 models:
@@ -36,6 +36,10 @@ mock:
 ## Knowledge base: the Farm's corpus -> bge-m3 -> Chroma in data/kb/ (~5 s).
 kb:
 	$(UV) run python -m new_horizons.app.ingest.run
+
+## Dry run of the same build: chunk + resolve every citation key, no model, no writes.
+kb-check:
+	$(UV) run python -m new_horizons.app.ingest.run --dry-run
 
 ingest: kb
 

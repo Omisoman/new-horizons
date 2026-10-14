@@ -3,6 +3,7 @@ equal the generator's own ground truth (ingest/validation/expected-results.json,
 written by `make mock` — never typed by hand)."""
 
 import json
+import os
 
 import pytest
 
@@ -40,8 +41,19 @@ def test_reconciliation_money_equals_ground_truth():
         {k: round(v, 3) for k, v in e["kg"].items()}
 
 
+def _db_up() -> bool:
+    try:
+        import psycopg
+        psycopg.connect(os.environ.get("DATABASE_URL_RO",
+                                       "postgresql://farm_ro:farm-ro@localhost:5432/horizons"),
+                        connect_timeout=2).close()
+        return True
+    except Exception:
+        return False
+
+
+@pytest.mark.skipif(not _db_up(), reason="the metrics read the farm database (make db-up)")
 def test_metric_figures_equal_the_validation_set():
-    pytest.importorskip("psycopg")
     from new_horizons.app.analytics import metrics as M
     e = _expected()
     pump = M.pump_failure_loss()["figures"]
@@ -78,6 +90,7 @@ def test_metric_figures_equal_the_validation_set():
     assert dosing["events"] == str(e["weekly_dosing"]["events"])
 
 
+@pytest.mark.skipif(not _db_up(), reason="the metrics read the farm database (make db-up)")
 def test_the_question_set_states_ground_truth():
     """Every must-include figure in docs/question-set.yaml appears in its expected
     answer, and every intent question's figures are what its resolver says."""

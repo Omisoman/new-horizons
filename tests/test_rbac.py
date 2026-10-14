@@ -8,7 +8,7 @@ from new_horizons.shared.rules.rbac import AccessDenied, check
 def test_ops_allowed_plain_tools():
     assert check("ops", "gitea_pr") == "allowed"
     assert check("ops", "build_run") == "allowed"
-    assert check("ops", "validate_smoke") == "allowed"
+    assert check("ops", "validate_run") == "allowed"
 
 
 def test_deploy_requires_approval_for_every_allowed_role():

@@ -97,13 +97,16 @@ def register_metrics(toolset: str, factory) -> None:
 
 def register_toolset(name: str, registry: dict, runner, system_md: str | None = None,
                      retrieval: bool = True, kb_dir: str | Path | None = None,
-                     metrics=None) -> None:
+                     metrics=None, actor: str = "analytics-agent",
+                     audits_calls: bool = False) -> None:
     """`metrics`: an object with match(question, guard) / resolve(intent, question)
     (app/analytics/metrics.py) — known questions for this toolset. Only toolsets
-    with retrieval use it."""
+    with retrieval use it. `actor` names the agent in the audit chain;
+    `audits_calls`: the runner writes its own tool_call events (tier-2's ops
+    runner does, rules-checked), so the loop must not write a second one."""
     TOOLSETS[name] = {"registry": registry, "run": runner, "system_md": system_md,
                       "retrieval": retrieval, "kb_dir": str(kb_dir) if kb_dir else None,
-                      "metrics": metrics}
+                      "metrics": metrics, "actor": actor, "audits_calls": audits_calls}
 
 
 def scoped_tools(tools, kb_dir: str | Path | None = None) -> tuple[dict, Any]:
@@ -190,7 +193,7 @@ def _schema_digest() -> str:
         return ""
 
 
-def _call(model_name: str, messages: list, usage: dict) -> str:
+def _call(model_name: str, messages: list, usage: dict, actor: str = "analytics-agent") -> str:
     llm = chat_model(model_name)
     t0 = time.time()
     resp = llm.invoke(messages)
@@ -199,7 +202,7 @@ def _call(model_name: str, messages: list, usage: dict) -> str:
     usage["input"] = usage.get("input", 0) + meta.get("input_tokens", 0)
     usage["output"] = usage.get("output", 0) + meta.get("output_tokens", 0)
     usage["ms"] = usage.get("ms", 0) + ms
-    audit("analytics-agent", "model_call",
+    audit(actor, "model_call",
           {"model": model_name, "ms": ms,
            "input_tokens": meta.get("input_tokens"),
            "output_tokens": meta.get("output_tokens")})
@@ -499,6 +502,7 @@ def tool_loop(state: AgentState, config) -> dict:
     model_name = _model_name(config)
     ts = _toolset(config)
     registry, run_tool = ts["registry"], ts["run"]
+    actor = ts.get("actor", "analytics-agent")
     hardened = ts["retrieval"]
     system_md = ts["system_md"] or _system_md()
     usage = state.get("tokens", {})
@@ -535,7 +539,7 @@ def tool_loop(state: AgentState, config) -> dict:
     retried = nudged = gated = tool_ok = False
     last_call: tuple | None = None
     for _ in range(MAX_STEPS):
-        raw = _call(model_name, messages, usage)
+        raw = _call(model_name, messages, usage, actor)
         try:
             decision = parse_decision(raw)
         except ProtocolError:
@@ -572,8 +576,9 @@ def tool_loop(state: AgentState, config) -> dict:
             tool_ok = tool_ok or ok
             if ok:
                 grounds.append(result)
-            audit("analytics-agent", "tool_call",
-                  {"tool": decision.tool, "args": decision.args, "ok": ok, "ms": ms})
+            if not ts.get("audits_calls"):
+                audit(actor, "tool_call",
+                      {"tool": decision.tool, "args": decision.args, "ok": ok, "ms": ms})
             trace.append({"tool": decision.tool, "args": decision.args,
                           "ok": ok, "ms": ms})
             payload = json.dumps(result, ensure_ascii=False, default=str)[:6000]
@@ -594,7 +599,7 @@ def tool_loop(state: AgentState, config) -> dict:
             failed = bool(trace) and not tool_ok
             if (bare or unqueried or failed) and not gated:
                 gated = True
-                audit("analytics-agent", "figure_gate",
+                audit(actor, "figure_gate",
                       {"stage": "sent back", "figures": bare, "route": state.get("route"),
                        "after_tools": tool_ok})
                 messages.append(HumanMessage(
@@ -603,7 +608,7 @@ def tool_loop(state: AgentState, config) -> dict:
                     GATE_NUDGE if bare else GATE_NO_TOOL))
                 continue
             if bare and not tool_ok:
-                audit("analytics-agent", "figure_gate",
+                audit(actor, "figure_gate",
                       {"stage": "declined", "figures": bare, "route": state.get("route")})
                 answer, citations = DECLINE[lang], []
                 break
@@ -618,14 +623,14 @@ def tool_loop(state: AgentState, config) -> dict:
     if hardened and answer.startswith(GUARDS):
         # the step budget, the loop guard or the protocol gave out: say so in the
         # user's language; the reason stays in the audit log, not on the screen
-        audit("analytics-agent", "guard", {"reason": answer, "route": state.get("route"),
+        audit(actor, "guard", {"reason": answer, "route": state.get("route"),
                                            "tools": [t["tool"] for t in trace]})
         answer, citations = STUCK[lang], []
     unverified: list[str] = []
     if hardened and answer and answer not in (DECLINE[lang], STUCK[lang]):
         answer, unverified = strip_unsupported(answer, evidence(*grounds), UNVERIFIED[lang])
         if unverified:
-            audit("analytics-agent", "unverified_figures",
+            audit(actor, "unverified_figures",
                   {"figures": unverified, "question": question[-300:],
                    "tools": [t["tool"] for t in trace]})
             if not re.search(r"[A-Za-z؀-ۿ]{3,}", answer.replace(UNVERIFIED[lang], "")):

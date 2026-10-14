@@ -17,6 +17,7 @@ ENV_FILE=.env
 SOJOURNER="${SOJOURNER_DIR:-../sojourner}"
 T1="$SOJOURNER/infra/compose/tier1.env"
 T2="$SOJOURNER/infra/compose/tier2.env"
+ST="$SOJOURNER/infra/compose/staging.env"   # the deployed app follows the lane too
 
 usage() { sed -n '2,12p' "$0" >&2; exit 2; }
 [ -n "$MODE" ] || usage
@@ -73,20 +74,20 @@ case "$MODE" in
   local) LANE_URL="http://host.docker.internal:11434/v1" ;;
   *)     LANE_URL="$CHAT" ;;
 esac
-for f in "$T1" "$T2"; do
+for f in "$T1" "$T2" "$ST"; do
   [ -f "$f" ] || continue
   set_kv "$f" LLM_BASE_URL "$TIER_URL"
   set_kv "$f" LLM_API_KEY "$TIER_KEY"
   set_kv "$f" LLM_PROVIDER "$MODE"
   set_kv "$f" LLM_LANE_URL "$LANE_URL"
 done
-[ -f "$T2" ] && set_kv "$T2" LLM_MODEL_DEFAULT "$DEFAULT"
+for f in "$T2" "$ST"; do [ -f "$f" ] && set_kv "$f" LLM_MODEL_DEFAULT "$DEFAULT"; done
 
 cat <<EOF
 
 lane: $MODE
   app (host)     chat  -> $CHAT
-  sojourner (tiers)  chat  -> $TIER_URL
+  sojourner (tiers + staging)  chat  -> $TIER_URL
   proxy upstream       -> $UPSTREAM
   models               -> ${MODELS:-<local registry>}   default: $DEFAULT
   embeddings + VLM     -> http://localhost:11434  (unchanged, local by design)

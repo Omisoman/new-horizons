@@ -13,6 +13,8 @@ from pathlib import Path
 
 import httpx
 
+from new_horizons.paths import data_path
+
 
 def _ollama_host() -> str:
     # bge-m3 is a local model: it stays on the Ollama host even when chat runs
@@ -39,7 +41,7 @@ COLLECTION = "farm_kb"
 class KB:
     def __init__(self, path: str | None = None):
         import chromadb
-        root = Path(path or os.environ.get("KB_DIR", "data/kb")) / "chroma"
+        root = Path(path or data_path(os.environ.get("KB_DIR"), "kb")) / "chroma"
         self.client = chromadb.PersistentClient(path=str(root))
         self.col = self.client.get_or_create_collection(
             COLLECTION, metadata={"hnsw:space": "cosine"})

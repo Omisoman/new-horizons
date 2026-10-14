@@ -21,14 +21,14 @@ import yaml
 
 from new_horizons.app.ingest import run as kb_build
 from new_horizons.app.ingest.chunker import chunk_markdown, section_number
-from new_horizons.paths import APP, ROOT
+from new_horizons.paths import APP, DATA, ROOT
 
 pytestmark = pytest.mark.domain
 
 INGEST = APP / "ingest"
 CORPUS = INGEST / "kb_synthetic"
 OVERLAYS = INGEST / "kb_market"
-KB_DIR = ROOT / "data" / "kb"
+KB_DIR = DATA / "kb"
 PROFILE = yaml.safe_load((APP / "profile.yaml").read_text(encoding="utf-8"))
 CURRENCY = re.compile(r"\bEUR\b|\beuros?\b|يورو|€|\$|\bdollars?\b", re.I)
 
@@ -209,3 +209,11 @@ def _top(kb, query, k):
 def test_retrieval_finds_governing_terms(kb, query, expected, k):
     top = _top(kb, query, k)
     assert expected & set(top), f"{query!r} -> {top}"
+
+
+def test_dry_run_resolves_every_citation_key_without_a_model():
+    """Sojourner's validate gate runs this: no embedding, no writes."""
+    from new_horizons.app.ingest import run
+    c = run.check()
+    assert c["ok"], c["problems"]
+    assert c["citation_keys"] >= 31 and c["chunks"] > 0

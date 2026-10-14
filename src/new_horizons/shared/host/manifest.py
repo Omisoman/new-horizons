@@ -19,7 +19,7 @@ from typing import Any, Callable, NamedTuple
 import streamlit as st
 from pydantic import BaseModel, ConfigDict, Field
 
-from new_horizons.paths import ROOT
+from new_horizons.paths import data_path
 
 
 class Resolved(NamedTuple):
@@ -41,7 +41,7 @@ class Resources(BaseModel):
         kb = os.environ.get(f"{tenant_id.upper()}_KB_DIR") or (
             str(self.kb_dir) if self.kb_dir else None)
         if kb and not Path(kb).is_absolute():
-            kb = str(ROOT / kb)
+            kb = str(data_path(kb, "kb"))
         prompt = (self.system_prompt.read_text(encoding="utf-8")
                   if self.system_prompt and self.system_prompt.exists() else None)
         return Resolved(os.environ.get(self.db_url_env), kb, prompt, tuple(self.tools))

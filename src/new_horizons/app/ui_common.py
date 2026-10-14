@@ -35,7 +35,7 @@ import streamlit as st
 import yaml
 from dotenv import load_dotenv
 
-from new_horizons.paths import ROOT
+from new_horizons.paths import DATA, ROOT, data_path
 from new_horizons.shared.host.manifest import Resources, tenant_graph
 from new_horizons.shared.llm.switch import (  # noqa: F401  (model-level; shared with apps-host)
     current_model_html, default_model, model_dialog, model_label, swap_model)
@@ -61,16 +61,16 @@ CURRENCY = PROFILE["market"]["currency"]
 TENANT = "analytics"
 RESOURCES = Resources(
     db_url_env="ANALYTICS_DATABASE_URL",
-    kb_dir=ROOT / os.environ.get("KB_DIR", "data/kb"),
+    kb_dir=data_path(os.environ.get("KB_DIR"), "kb"),
     system_prompt=APP / "agents" / "analytics" / "SYSTEM.md",
     tools=("sql_query", "kb_search", "unit_status", "recon_summary", "reconcile_document",
            "audit_trail", "ocr_document", "drift_report", "pattern_scan"),
 )
 KB_DIR = Path(RESOURCES.resolve(TENANT).kb_dir)
-AN_DIR = ROOT / "data" / "analytics"
-SAMPLES = ROOT / "data" / "samples"
-UPLOADS = ROOT / "data" / "uploads"
-SETTINGS_FILE = ROOT / "data" / "ui_settings.json"   # application-wide UI settings: theme, lang
+AN_DIR = DATA / "analytics"
+SAMPLES = DATA / "samples"
+UPLOADS = DATA / "uploads"
+SETTINGS_FILE = DATA / "ui_settings.json"   # application-wide UI settings: theme, lang
 
 _VARS = {  # css variable -> colour token (every theme defines every token)
     "bg": "bg", "card": "card", "muted": "muted", "border": "border",
@@ -909,7 +909,7 @@ def _json_at(path: str, _mtime_ns: int):
 
 
 def mock_meta() -> dict | None:
-    return load_json(ROOT / "data" / "mock_meta.json")
+    return load_json(DATA / "mock_meta.json")
 
 
 def graph():

@@ -4,6 +4,7 @@ rule excerpts)."""
 
 import json
 import os
+import shutil
 
 import pytest
 
@@ -81,7 +82,7 @@ def test_changes_shows_the_deploys_or_explains_the_loop(app):
     from new_horizons.shared.audit.audit import deploys
     md = _open(app, "changes")
     if deploys(1):
-        assert deploys(1)[0]["payload"]["ref"] in " ".join(
+        assert deploys(1)[0]["payload"]["ref"][:12] in " ".join(
             str(v) for df in app.dataframe for v in df.value.values.ravel())
     else:
         assert ("No deploys yet" in md) if app.lang == "en" else ("لا عمليات نشر بعد" in md)
@@ -94,7 +95,8 @@ def test_the_document_and_chat_pages_render(app, key):
     assert "ac-header" in md
 
 
-@pytest.mark.skipif(not (DATA / "samples" / "lab-report.pdf").exists(), reason="samples not printed")
+@pytest.mark.skipif(not (DATA / "samples" / "lab-report.pdf").exists() or not shutil.which("tesseract"),
+                    reason="needs the printed samples and tesseract")
 def test_a_sample_runs_through_intake_and_raises_the_alert(app, monkeypatch):
     """The Documents page's sample button: read → extract → reconcile → terms →
     compose, the alert card on the page and the alert waiting in Chat."""

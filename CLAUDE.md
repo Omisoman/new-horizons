@@ -14,8 +14,11 @@ Built for one MacBook Pro, 16 GB. MIT, synthetic, seeded (`seed: 2019`).
   `host/`, and views never import each other — `make lint` (import-linter) enforces both.
   The app registers its farm tools and metrics layer with the harness
   (`app/analytics/agent_tools.py` → `toolbox.register`, `graph.register_metrics`).
-- Paths hang off `new_horizons.paths.ROOT` (the checkout; `HORIZONS_HOME` when the
-  package is installed elsewhere). Data lives in `data/` (gitignored except `_seed/`).
+- Paths: code and repo files hang off `new_horizons.paths.ROOT` (the checkout;
+  `HORIZONS_HOME` when the package is installed elsewhere); generated data off `DATA`
+  (`data/`, gitignored except `_seed/`) — `HORIZONS_DATA` moves only the data
+  (Sojourner's tier-2 and staging keep it on a volume). Resolve configured
+  locations with `paths.data_path`, never `ROOT / "data"`.
 - Governance: decisions and the kill switch are AUDIT EVENTS (`shared/audit/audit.py`:
   record_decision / set_agent_state / decisions / events), never UI state or a side
   table — the drawer renders the chain itself. Pausing the agent stops document intake
@@ -65,6 +68,9 @@ Built for one MacBook Pro, 16 GB. MIT, synthetic, seeded (`seed: 2019`).
   rewrites `.env` and, when the sibling checkout exists, sojourner's tier env files.
   `shared/llm/provider.py` returns TWO endpoints: chat (switchable) and the Ollama host
   (always local). Embeddings (bge-m3) and the vision model (qwen3-vl) never follow chat.
+- `make kb-check` is the KB build's dry run (chunks + every citation key, no model);
+  Sojourner's validate gate runs it, plus `tests/test_validation.py` and
+  `tests/test_views.py` on the shared database.
 - Tests: `make test` (needs `make db-up`; the farm tests need `make mock kb`). CI runs
   `pytest -m "not model"`, `make lint` and `make client-free`.
 

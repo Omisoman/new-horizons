@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from new_horizons.host import host_common as H
+from new_horizons.paths import DATA
 from new_horizons.shared.harness import graph as G
 from new_horizons.shared.harness import tools as toolbox
 from new_horizons.shared.host.manifest import Resources, graph_key
@@ -76,7 +77,7 @@ def test_resources_resolve_per_tenant_env(monkeypatch):
     monkeypatch.setenv("ACME_KB_DIR", "data/acme-kb")
     r = res.resolve("acme")
     assert r.db_url == "postgresql://acme"
-    assert r.kb_dir == str(ROOT / "data/acme-kb")  # relative -> repo root
+    assert r.kb_dir == str(DATA / "acme-kb")  # data/… -> the data home (HORIZONS_DATA)
     assert r.tools == ("kb_search",) and r.system_prompt is None
 
 

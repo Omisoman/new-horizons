@@ -25,7 +25,7 @@ class Script:
     def __init__(self, *replies):
         self.replies, self.prompts = list(replies), []
 
-    def __call__(self, model, messages, usage):
+    def __call__(self, model, messages, usage, actor="analytics-agent"):
         self.prompts.append("\n".join(str(m.content) for m in messages))
         usage["ms"] = usage.get("ms", 0) + 1
         return self.replies.pop(0)

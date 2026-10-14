@@ -15,6 +15,8 @@ import threading
 from datetime import datetime, timezone
 from pathlib import Path
 
+from new_horizons.paths import data_path
+
 _lock = threading.Lock()
 GENESIS = "genesis"
 AUDIT_LOCK_KEY = 0x6A1C0A0D17  # pg advisory lock id for the audit chain
@@ -26,7 +28,7 @@ def _dsn() -> str:
 
 
 def _jsonl_path() -> Path:
-    p = Path(os.environ.get("AUDIT_JSONL", "data/audit/audit.jsonl"))
+    p = data_path(os.environ.get("AUDIT_JSONL"), "audit/audit.jsonl")
     p.parent.mkdir(parents=True, exist_ok=True)
     return p
 

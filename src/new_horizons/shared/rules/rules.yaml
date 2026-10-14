@@ -25,7 +25,7 @@ tools:
   deploy_staging:
     roles: [ops, admin]
     approval_required: true          # submitted -> working -> input-required
-  validate_smoke:
+  validate_run:
     roles: [ops, admin]
     approval_required: false
   notify:

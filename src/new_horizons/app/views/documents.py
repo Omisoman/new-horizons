@@ -83,11 +83,12 @@ st.markdown(V.checks_table(result), unsafe_allow_html=True)
 
 doc_col, fields_col = st.columns([1, 1.15], gap="large")
 with doc_col:
-    pages = result["doc"].get("pages", 1)
+    doc, read = result.get("doc") or {}, result.get("read") or {}   # a failed read has neither
+    pages = doc.get("pages", 1)
     U.section(tr("Document", "المستند"),
-              f"{result['doc'].get('kind', '')} · {result['read'].get('engine', '')} · "
+              f"{doc.get('kind', '')} · {read.get('engine', '')} · "
               + tr(f"{pages} page(s)", f"{pages} صفحة"))
-    preview = result["doc"].get("preview_png")
+    preview = doc.get("preview_png")
     if preview and Path(preview).exists():
         with U.card("documents-1"):
             st.image(preview, width="stretch")

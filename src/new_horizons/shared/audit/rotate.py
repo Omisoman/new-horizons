@@ -46,7 +46,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from new_horizons.paths import ROOT
+from new_horizons.paths import ROOT, data_path
 
 # the DSN lives in the repo's .env (audit._dsn reads the environment)
 load_dotenv(ROOT / ".env")
@@ -225,7 +225,7 @@ def main(argv: list[str] | None = None) -> int:
         cur.execute(DDL)
         conn.commit()
 
-    mirror = Path(os.environ.get("AUDIT_JSONL", "data/audit/audit.jsonl"))
+    mirror = data_path(os.environ.get("AUDIT_JSONL"), "audit/audit.jsonl")
     mirror_archive = mirror.with_name(f"audit-archive-{suffix}.jsonl")
     if mirror.exists():
         mirror.rename(mirror_archive)

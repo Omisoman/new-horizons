@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-from new_horizons.paths import ROOT
+from new_horizons.paths import data_path
 
 MAX_ROWS = 200
 
@@ -78,7 +78,7 @@ def _sql_hint(sql: str, error: str | None = None) -> str | None:
 
 def kb_search(query: str, k: int = 6, synthetic: bool | None = None) -> dict:
     """Semantic search over the knowledge base (the Farm's procedures)."""
-    return kb_search_in(ROOT / os.environ.get("KB_DIR", "data/kb"), query, k, synthetic)
+    return kb_search_in(data_path(os.environ.get("KB_DIR"), "kb"), query, k, synthetic)
 
 
 def kb_search_in(kb_dir: str | Path, query: str, k: int = 6,
