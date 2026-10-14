@@ -909,7 +909,9 @@ def mock_meta() -> dict | None:
 
 
 def graph():
-    """This tenant's graph — its tools, KB and prompt; cached per tenant."""
+    """This tenant's graph — its tools, KB and prompt; cached per tenant. Importing
+    agent_tools registers the farm's tools and metrics layer with the harness."""
+    import new_horizons.app.analytics.agent_tools  # noqa: F401
     return tenant_graph(TENANT, RESOURCES)
 
 

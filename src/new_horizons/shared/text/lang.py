@@ -35,7 +35,8 @@ NEUTRAL = re.compile(
     rf"{_R}"
     rf"|{_L}\d{{4}}-Q[1-4]{_R}|{_L}Q[1-4]{_R}|{_L}\d{{4}}/\d{{2}}{_R}"  # 2026-Q3, batch 2026/05
     rf"|{_L}\d{{1,2}}:\d{{2}}{_R}"                                  # 12:34
-    rf"|{_L}[a-z]+(?:_[a-z0-9]+)+(?:\.[a-z_]+)?{_R}"                # telemetry.readings, water_level_cm
+    rf"|{_L}[a-z]+(?:_[a-z0-9]+)+(?:\.[a-z_]+)?{_R}"                # water_level_cm, farm_ro.x
+    rf"|{_L}[a-z]+\.[a-z][a-z0-9_]*{_R}"                            # telemetry.readings
     rf"|{_L}[a-z]+(?:-[a-z]+)+{_R}"                                 # water-quality-sop
     rf"|{_L}[A-Z]{{2,}}[A-Z0-9]*{_R}"                               # EUR, DO, SOP
 )

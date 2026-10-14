@@ -1,0 +1,363 @@
+# Known questions → deterministic answers (metrics layer).
+#
+# A question whose embedding is close enough to one intent's paraphrases is
+# answered by that intent's resolver (analytics/metrics.py): the figures are
+# computed and the answer is the resolver's template. Everything else goes to the
+# free agent. Paraphrases are STANDALONE questions — a follow-up ("and how much did
+# that cost us?") is rewritten into one before it is matched.
+#
+#   family     data | knowledge — also steers the router for unmatched questions
+#   resolver   function name in analytics/metrics.py
+#   cite       key in ingest/kb_synthetic/citations.yaml
+#   screen     where the same figures sit in the app
+#   slots      the resolver reads a record or a month from the question
+#   not        narrower questions this intent does NOT answer; a question at least
+#              as close to one of these as to the intent's own paraphrases goes to
+#              the free agent
+#   phrasing   template = never let the model reword this intent
+#   after      intents this one can follow in a conversation…
+#   follow_ups …and the dependent wordings that count only right after one of them
+#
+# Period words in a question (a year, a quarter, a month, "this week") must also
+# occur in one of the intent's paraphrases, or the question is not this intent.
+
+threshold: 0.80
+margin: 0.02
+
+# Words that name a record by its number: "unit 3", "الوحدة 3" and "AQ 3" become AQ-03
+# before anything else reads the question — but only when that code exists.
+aliases:
+  - code: AQ
+    width: 2
+    source: telemetry.units.unit_id
+    words:
+      en: [unit, grow unit, tank]
+      ar: [وحدة, حوض]
+  - code: TEC
+    width: 2
+    source: maintenance.technicians.technician_code
+    words:
+      en: [technician, tech]
+      ar: [فني]
+
+intents:
+  - id: farm_overview
+    family: data
+    resolver: farm_overview
+    cite: data_joins
+    screen: Overview
+    paraphrases:
+      en:
+        - How many grow units and fish does the farm run?
+        - What does the farm grow, and how big is it?
+        - Give me an overview of the farm's units, crops and fish.
+        - How many fish and how many square metres of grow beds do we have?
+      ar:
+        - كم وحدة زراعة وكم سمكة في المزرعة؟
+        - ماذا تزرع المزرعة وما حجمها؟
+        - أعطني نظرة عامة على وحدات المزرعة ومحاصيلها وأسماكها.
+        - قديش عنا سمك وقديش مساحة أحواض الزراعة؟
+    not:
+      en:
+        - How many fish does AQ-03 have?
+        - What did the farm harvest in August?
+      ar:
+        - كم سمكة في الوحدة AQ-03؟
+
+  - id: pump_failure
+    family: data
+    resolver: pump_failure
+    cite: pump_command_check
+    screen: Reconcile
+    paraphrases:
+      en:
+        - Which unit had the pump failure, and when?
+        - When did the water pump fail and on which unit?
+        - Tell me about the pump failure on AQ-03.
+        - Was there a pump that the controller commanded but that never ran?
+      ar:
+        - أي وحدة تعطلت مضختها ومتى؟
+        - متى تعطلت مضخة المياه وفي أي وحدة؟
+        - أخبرني عن تعطل المضخة في الوحدة AQ-03.
+        - في مضخة أمرتها وحدة التحكم وما اشتغلت؟
+
+  - id: pump_failure_loss
+    family: data
+    resolver: pump_failure_loss
+    cite: pump_response
+    screen: Reconcile
+    phrasing: template
+    paraphrases:
+      en:
+        - How many kilograms did AQ-03 lose in the week after the pump failure, and what does the maintenance SOP say the response time should have been?
+        - What did the pump failure cost us in harvest, and how fast should we have responded?
+        - How much harvest did AQ-03 lose after its pump failed?
+        - How many kilos of tomato did the pump outage cost, and what is the response time in the SOP?
+      ar:
+        - كم كيلوغراماً خسرت الوحدة AQ-03 في الأسبوع التالي لتعطل المضخة، وماذا تقول إجراءات الصيانة عن زمن الاستجابة المطلوب؟
+        - كم كلّفنا تعطل المضخة من المحصول، وما سرعة الاستجابة المطلوبة؟
+        - كم خسرت الوحدة AQ-03 من الحصاد بعد تعطل مضختها؟
+        - قديش خسرنا طماطم بسبب عطل المضخة، وشو زمن الاستجابة بالإجراءات؟
+    after: [pump_failure]
+    follow_ups:
+      en:
+        - And how many kilograms did that cost us?
+        - And how much harvest did we lose because of it?
+      ar:
+        - وكم كيلوغراماً كلّفنا ذلك؟
+        - وقديش خسرنا محصول بسببه؟
+
+  - id: open_alerts
+    family: data
+    resolver: open_alerts
+    cite: escalation_matrix
+    screen: Overview
+    paraphrases:
+      en:
+        - How many alerts are open right now?
+        - How many alerts did the controller raise, and are any still open?
+        - Are there any open alarms on the farm?
+        - Were all the alerts answered in time?
+      ar:
+        - كم تنبيهاً مفتوحاً الآن؟
+        - كم تنبيهاً أصدرت وحدة التحكم وهل ما زال أي منها مفتوحاً؟
+        - في إنذارات مفتوحة بالمزرعة؟
+        - شو في إنذارات مفتوحة هلّق؟
+        - هل جرت الاستجابة لكل التنبيهات في الوقت المحدد؟
+    not:
+      en:
+        - How many alerts did AQ-03 raise in July?
+      ar:
+        - كم تنبيه انخفاض أكسجين صدر؟
+
+  - id: recon_exposure
+    family: data
+    resolver: recon_exposure
+    cite: figure_provenance
+    screen: Reconcile
+    paraphrases:
+      en:
+        - How much is at risk across the reconciliation exceptions?
+        - How much money is sitting in unresolved reconciliation right now?
+        - What is the total at risk in the reconciliation, by class?
+        - How many kilograms and euros are at risk in the exceptions?
+      ar:
+        - كم المبلغ المعرّض للخطر في استثناءات المطابقة؟
+        - كم من المال عالق في المطابقة غير المحسومة الآن؟
+        - ما إجمالي المعرّض للخطر في المطابقة حسب الفئة؟
+        - شو المبلغ اللي بخطر بالمطابقة هلّق؟
+    not:
+      en:
+        - How much did the pump failure cost us?
+        - How much were the unshipped harvests worth?
+
+  - id: ghost_harvests
+    family: data
+    resolver: ghost_harvests
+    cite: harvest_countersign
+    screen: Patterns
+    paraphrases:
+      en:
+        - Which harvests were never shipped, and who logged them?
+        - Are there harvests with no shipment?
+        - Who logged the harvests that nobody shipped?
+        - Which harvest records don't add up?
+        - Who keeps logging harvests that never get shipped out?
+      ar:
+        - أي عمليات حصاد لم تُشحن أبداً ومن سجّلها؟
+        - هل هناك حصاد بلا شحنة؟
+        - من سجّل الحصاد الذي لم يشحنه أحد؟
+        - مين سجّل حصاد وما انشحن؟
+
+  - id: unmetered_feed
+    family: data
+    resolver: unmetered_feed
+    cite: stock_unmetered
+    screen: Reconcile
+    paraphrases:
+      en:
+        - Was any feed used that we never bought?
+        - Did a unit eat feed with no purchase behind it?
+        - Is there any unmetered consumption in the supplies?
+        - Which feed did we consume without buying it?
+      ar:
+        - هل استُخدم علف لم نشتره أبداً؟
+        - هل أكلت وحدة علفاً بلا عملية شراء؟
+        - هل هناك استهلاك غير مقيس في المستلزمات؟
+        - في علف استهلكناه وما اشتريناه؟
+
+  - id: feed_biosecurity
+    family: knowledge
+    resolver: feed_biosecurity
+    cite: feed_source
+    screen: Reconcile
+    phrasing: template
+    paraphrases:
+      en:
+        - Is feed of unknown origin a biosecurity problem?
+        - What do we do with feed that did not come from an approved supplier?
+        - Can we feed fish from a bag nobody bought through purchasing?
+        - What does the biosecurity procedure say about feed sources?
+      ar:
+        - هل العلف مجهول المصدر مشكلة أمن حيوي؟
+        - ماذا نفعل بعلف لم يأتِ من مورد معتمد؟
+        - هل يجوز إطعام السمك من كيس لم يُشترَ عبر المشتريات؟
+        - ماذا تقول قواعد الأمن الحيوي عن مصادر العلف؟
+    after: [unmetered_feed]
+    follow_ups:
+      en:
+        - Is that a biosecurity problem?
+        - And what should we do about it?
+      ar:
+        - وهل هذه مشكلة أمن حيوي؟
+        - وشو لازم نعمل فيه؟
+
+  - id: heatwave_aeration
+    family: data
+    resolver: heatwave_aeration
+    cite: aeration_duty
+    screen: Drift
+    paraphrases:
+      en:
+        - What happened to aeration on the tomato unit during the heatwave?
+        - How hard did the air pump work during the heatwave?
+        - Did the heatwave push any air pump above its duty limit?
+        - How did the heat in late July affect the fish tanks?
+      ar:
+        - ماذا حدث للتهوية في وحدة الطماطم خلال موجة الحر؟
+        - كم اشتغلت مضخة الهواء خلال موجة الحر؟
+        - هل دفعت موجة الحر أي مضخة هواء فوق حدها؟
+        - كيف أثّر حر آخر تموز على أحواض السمك؟
+
+  - id: ph_drift_cause
+    family: data
+    resolver: ph_drift_cause
+    cite: sensor_vs_chemistry
+    screen: Drift
+    paraphrases:
+      en:
+        - Is the pH drift on AQ-04 a sensor problem or a chemistry problem?
+        - Why did AQ-04's pH reading go up in August?
+        - Is the AQ-04 pH probe wrong or did the water change?
+        - What does the lab report say about the AQ-04 pH probe?
+      ar:
+        - هل انحراف الحموضة في الوحدة AQ-04 مشكلة مجس أم مشكلة كيمياء؟
+        - لماذا ارتفعت قراءة الحموضة في الوحدة AQ-04 في آب؟
+        - هل مجس الحموضة في AQ-04 خطأ أم تغيّرت المياه؟
+        - شو بيقول تقرير المختبر عن مجس الحموضة بالوحدة AQ-04؟
+
+  - id: sensor_dropouts
+    family: data
+    resolver: sensor_dropouts
+    cite: sensor_dropout
+    screen: Patterns
+    paraphrases:
+      en:
+        - Were there sensor dropouts, and do they change the drift results?
+        - Did any sensor stop reporting?
+        - Are there gaps in the readings?
+        - Do missing readings affect the drift analysis?
+      ar:
+        - هل حدثت انقطاعات في الحساسات وهل تغيّر نتائج الانحراف؟
+        - هل توقف أي حساس عن الإرسال؟
+        - هل هناك فجوات في القراءات؟
+        - هل تؤثر القراءات المفقودة على تحليل الانحراف؟
+
+  - id: harvest_and_sales
+    family: data
+    resolver: harvest_and_sales
+    cite: price_list
+    screen: Overview
+    slots: [month]
+    paraphrases:
+      en:
+        - How much did the farm harvest and ship in August, and for how much?
+        - What did we harvest and sell in July?
+        - How many kilograms did we ship and what did we earn?
+        - What were the farm's harvest and sales in June?
+      ar:
+        - كم حصدت المزرعة وكم شحنت في آب وبكم؟
+        - ماذا حصدنا وبعنا في تموز؟
+        - كم كيلوغراماً شحنّا وكم كسبنا؟
+        - قديش حصدنا وبعنا بحزيران؟
+    not:
+      en:
+        - How much did AQ-03 harvest in July?
+        - Which customer bought the most basil?
+        - And how many kilograms did that cost us?
+        - How much did that cost us?
+      ar:
+        - وكم كيلوغراماً كلّفنا ذلك؟
+
+  - id: technician_workload
+    family: data
+    resolver: technician_workload
+    cite: preventive_service
+    screen: Patterns
+    paraphrases:
+      en:
+        - Which technician closed the most work orders?
+        - Who does the most maintenance work?
+        - How are the work orders spread across the technicians?
+        - Which technicians are the busiest?
+      ar:
+        - أي فني أغلق أكبر عدد من أوامر العمل؟
+        - مين بيشتغل أكثر صيانة؟
+        - كيف تتوزع أوامر العمل على الفنيين؟
+        - من أكثر الفنيين انشغالاً؟
+
+  - id: dosing_schedule
+    family: knowledge
+    resolver: dosing_schedule
+    cite: ph_dosing
+    screen: Drift
+    phrasing: template
+    paraphrases:
+      en:
+        - When is the pH corrected, and by how much?
+        - How does the weekly pH dosing work?
+        - Is the weekly pH sawtooth a problem?
+        - Why does the pH jump every Monday?
+      ar:
+        - متى تُصحَّح الحموضة وبكم؟
+        - كيف تعمل جرعة الحموضة الأسبوعية؟
+        - هل نمط الحموضة الأسبوعي المسنّن مشكلة؟
+        - ليش بتطلع الحموضة كل يوم اثنين؟
+
+  - id: held_invoice
+    family: data
+    resolver: held_invoice
+    cite: invoice_tolerance
+    screen: Documents
+    slots: [invoice]
+    phrasing: template
+    paraphrases:
+      en:
+        - Why was INV-2026-0418 held?
+        - Show me the invoice that was held and tell me why.
+        - Why did the feed invoice not pass?
+        - What is wrong with the supplier invoice INV-2026-0418?
+      ar:
+        - لماذا أُوقفت الفاتورة INV-2026-0418؟
+        - أرني الفاتورة التي أُوقفت ولماذا.
+        - لماذا لم تمر فاتورة العلف؟
+        - شو المشكلة بفاتورة المورد INV-2026-0418؟
+
+  - id: decision_on_finding
+    family: data
+    resolver: decision_on_finding
+    cite: decision_record
+    screen: Admin center
+    slots: [subject]
+    phrasing: template
+    paraphrases:
+      en:
+        - Who decided on the AQ-03 pump incident, and when?
+        - Who approved that hold, and under which rule?
+        - Who escalated the finding, and when?
+        - What was decided on the last finding, and by whom?
+      ar:
+        - من قرّر بشأن حادثة مضخة AQ-03 ومتى؟
+        - من اعتمد ذلك الإيقاف وبموجب أي قاعدة؟
+        - من صعّد النتيجة ومتى؟
+        - ما القرار على آخر نتيجة ومن اتخذه؟

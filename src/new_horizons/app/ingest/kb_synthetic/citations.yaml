@@ -1,0 +1,118 @@
+# Citation registry — the contract between the KB corpus, the analytics and the
+# document-intake alert. Code cites by KEY; tests assert that every entry's
+# `source` + `section` exists in the indexed KB and that the section text
+# contains every `must_contain` term. Section numbers come from the doc
+# headings ("## 4. …", "### 3.1 …").
+
+water_ph_band:
+  source: water-quality-sop.md
+  section: "2"
+  must_contain: ["6.6", "7.2"]
+do_minimum:
+  source: water-quality-sop.md
+  section: "3"
+  must_contain: ["6.0", "6.5", "50%"]
+water_temp_band:
+  source: water-quality-sop.md
+  section: "4"
+  must_contain: ["23.5"]
+ph_dosing:
+  source: water-quality-sop.md
+  section: "5"
+  must_contain: ["Monday", "0.3", "7.1"]
+water_level_band:
+  source: water-quality-sop.md
+  section: "6"
+  must_contain: ["21", "18"]
+feeding_ration:
+  source: feeding-schedule.md
+  section: "2"
+  must_contain: ["12 g", "25%"]
+feed_change:
+  source: feeding-schedule.md
+  section: "3"
+  must_contain: ["approved supplier"]
+pump_response:
+  source: pump-maintenance-sop.md
+  section: "3"
+  must_contain: ["2 hours"]
+pump_command_check:
+  source: pump-maintenance-sop.md
+  section: "4"
+  must_contain: ["1.5 cm", "30 minutes"]
+aeration_duty:
+  source: pump-maintenance-sop.md
+  section: "5"
+  must_contain: ["50%"]
+harvest_countersign:
+  source: harvest-shipping-procedure.md
+  section: "2"
+  must_contain: ["countersign"]
+harvest_shipment_match:
+  source: harvest-shipping-procedure.md
+  section: "3"
+  must_contain: ["48 hours", "5%"]
+price_list:
+  source: harvest-shipping-procedure.md
+  section: "5"
+  must_contain: ["18.00"]
+feed_source:
+  source: biosecurity-rules.md
+  section: "3"
+  must_contain: ["approved supplier", "quarantine"]
+escalation_matrix:
+  source: alert-escalation.md
+  section: "2"
+  must_contain: ["Farm Manager", "owner"]
+escalation_timing:
+  source: alert-escalation.md
+  section: "3"
+  must_contain: ["4 hours", "one working day"]
+decision_record:
+  source: alert-escalation.md
+  section: "4"
+  must_contain: ["audit"]
+calibration_interval:
+  source: sensor-calibration.md
+  section: "2"
+  must_contain: ["monthly"]
+sensor_vs_chemistry:
+  source: sensor-calibration.md
+  section: "3"
+  must_contain: ["0.2", "between doses"]
+sensor_dropout:
+  source: sensor-calibration.md
+  section: "4"
+  must_contain: ["gap", "zero"]
+invoice_tolerance:
+  source: supplier-invoice-controls.md
+  section: "2"
+  must_contain: ["5%", "hold"]
+supplier_master:
+  source: supplier-invoice-controls.md
+  section: "3"
+  must_contain: ["approved supplier list", "phone"]
+stock_unmetered:
+  source: supplier-invoice-controls.md
+  section: "4"
+  must_contain: ["stock count", "2 working days"]
+data_joins:
+  source: data-dictionary.md
+  section: "1"
+  must_contain: ["business key"]
+figure_provenance:
+  source: data-dictionary.md
+  section: "7"
+  must_contain: ["at risk"]
+planted_scenarios:
+  source: data-dictionary.md
+  section: "8"
+  must_contain: ["synthetic"]
+lab_bands:
+  source: water-quality-sop.md
+  section: "8"
+  must_contain: ["0.5", "150", "0.2"]
+preventive_service:
+  source: pump-maintenance-sop.md
+  section: "2"
+  must_contain: ["monthly", "work order"]

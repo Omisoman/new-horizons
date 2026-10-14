@@ -31,7 +31,6 @@ mock:
 	$(UV) run python -m new_horizons.app.mock.generate
 	@for a in drift patterns recon; do \
 	  $(UV) run python -m new_horizons.app.analytics.$$a > /dev/null && echo "  analytics: $$a"; done
-	$(UV) run python -m new_horizons.app.intake.samples
 
 ## Knowledge base: the Farm's corpus -> bge-m3 -> Chroma in data/kb/ (~5 s).
 kb:

@@ -28,9 +28,58 @@ units:                             # unit_id, plant, location, grow bed m², bas
   - [AQ-03, tomato, greenhouse-B, 24.0, 22.5]
   - [AQ-04, basil, rooftop, 12.0, 20.0]
 
+prices:                            # per kg shipped (harvest-shipping-procedure §5)
+  pepper: 4.20
+  lettuce: 3.10
+  tomato: 3.60
+  basil: 18.00
+
 scale:                             # rows per primary table (telemetry is fixed by the cadence)
   technicians: 8
   customers: 14
   suppliers: 9
 
 seed: 2019
+
+# Planted scenarios — the generator writes them, the analytics must find them,
+# tests/test_scenarios.py asserts each one by name. Times are local farm time.
+scenarios:
+  pump_failure:        {unit: AQ-03, start: 2026-07-12T00:00, end: 2026-07-18T00:00,
+                        acknowledged: 2026-07-17T09:10, by: TEC-03}
+  heatwave:            {start: 2026-07-26T00:00, end: 2026-07-31T00:00, outdoor_c: 2.0}
+  ghost_harvests:      {technician: TEC-06, units: [AQ-01, AQ-02, AQ-04],
+                        dates: [2026-07-09, 2026-07-23, 2026-07-30, 2026-08-06, 2026-08-13, 2026-08-20]}
+  unmetered_feed:      {unit: AQ-02, item: FEED-03, start: 2026-08-01}
+  sensor_dropouts:
+    - {unit: AQ-02, start: 2026-06-13T03:00, hours: 9}
+    - {unit: AQ-04, start: 2026-08-06T14:00, hours: 5}
+  ph_probe_drift:      {unit: AQ-04, start: 2026-08-05T00:00, calibrated: 2026-08-21T10:00,
+                        max_offset: 0.45}
+
+# The document-intake test case (Documents page / Chat attachment). The generator
+# plants the purchase orders and the lab sample; intake/samples.py prints the scans
+# from them; tests assert the reconciliation verdict.
+document_intake:
+  held:                            # supplier invoice: 23 % over the agreed price, wrong supplier
+    invoice_no: INV-2026-0418
+    po_no: PO-2026-0031
+    item: FEED-01
+    qty: 50
+    ordered: 2026-08-24
+    supplier_ref: SUP-001          # on the purchase order
+    invoice_supplier_ref: SUP-007  # printed on the invoice — not on the approved list
+    invoice_unit_price: 2.95       # agreed 2.40 → +22.9 %
+    invoice_date: 2026-08-27
+  clean:                           # supplier invoice that matches its order exactly
+    invoice_no: INV-2026-0397
+    po_no: PO-2026-0030
+    item: NUT-01
+    qty: 2
+    ordered: 2026-08-17
+    supplier_ref: SUP-004
+    invoice_date: 2026-08-20
+  lab:                             # water-lab report: a grab sample against the probe
+    report_no: LAB-2026-0019
+    unit: AQ-04
+    sampled: 2026-08-19T09:00
+    lab_name: the Farm's contract water laboratory

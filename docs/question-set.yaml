@@ -1,0 +1,246 @@
+# The bilingual scorecard: 13 English and 13 Arabic questions, shuffled.
+# An Arabic question is answered in Arabic only, an English one in English only;
+# identifiers, citations, table names and EUR are neutral. Every figure is ground
+# truth from the generator (src/new_horizons/app/ingest/validation/expected-results.json,
+# pinned by tests/test_validation.py).
+#   intent      the known question it should match (null = off-script, the free agent answers)
+#   follows     asked on that question's thread
+#   cite        the KB section the answer must cite ("file.md §n")
+# Run: uv run python scripts/question-bank.py --set docs/question-set.yaml [--model llama3.1:8b]
+
+- id: S01
+  lang: en
+  screen: Overview
+  intent: farm_overview
+  q: How many grow units and fish does the farm run?
+  a: 4 grow units (AQ-01 pepper, AQ-02 lettuce, AQ-03 tomato, AQ-04 basil), 97 European perch, 83.0 m² of grow beds.
+  must_include: ["4", "97", "83.0"]
+  cite: data-dictionary.md §1
+
+- id: S02
+  lang: ar
+  screen: Reconcile
+  intent: pump_failure_loss
+  q: كم كيلوغراماً خسرت الوحدة AQ-03 في الأسبوع التالي لتعطل المضخة، وماذا تقول إجراءات الصيانة عن زمن الاستجابة المطلوب؟
+  a: خسرت الوحدة AQ-03 مقدار 9.80 كغ (حصاد 20 تموز 6.31 كغ مقابل 16.11 كغ في العادة)؛ تنص الإجراءات على الاستجابة خلال ساعتين، وانتظر التنبيه 113.2 ساعة.
+  must_include: ["9.80", "113.2"]
+  cite: pump-maintenance-sop.md §3
+
+- id: S03
+  lang: en
+  screen: Reconcile
+  intent: pump_failure
+  q: Which unit had the pump failure, and when?
+  a: AQ-03, 12–17 July — 555 water-pump runs commanded with no level rise; alert AL-2026-0001, repair work order 113.2 hours later.
+  must_include: ["555", "113.2"]
+  cite: pump-maintenance-sop.md §4
+
+- id: S04
+  lang: en
+  screen: Reconcile
+  intent: pump_failure_loss
+  follows: S03
+  q: And how many kilograms did that cost us?
+  a: "9.80 kg of tomato in the week after (6.31 kg against 16.11 kg usual), 35.28 EUR; the SOP's response time is 2 hours."
+  must_include: ["9.80"]
+  cite: pump-maintenance-sop.md §3
+
+- id: S05    # colloquial
+  lang: ar
+  screen: Overview
+  intent: open_alerts
+  q: في إنذارات مفتوحة هلّق بالمزرعة؟
+  a: لا يوجد أي تنبيه مفتوح الآن (0)؛ صدر 16 تنبيهاً في الفترة، وتأخرت الاستجابة لتنبيه واحد (AL-2026-0001، 113.2 ساعة).
+  must_include: ["16"]
+  cite: alert-escalation.md §2
+
+- id: S06    # colloquial
+  lang: en
+  screen: Reconcile
+  intent: recon_exposure
+  q: How much money is sitting in unresolved reconciliation right now?
+  a: 220.89 EUR and 48.63 kg across 8 exceptions — harvests never shipped 171.72, pump commanded with no level rise 35.28, feed consumed but never bought 13.89.
+  must_include: ["220.89"]
+  cite: data-dictionary.md §7
+
+- id: S07
+  lang: ar
+  screen: Patterns
+  intent: ghost_harvests
+  q: أي عمليات حصاد لم تُشحن أبداً ومن سجّلها؟
+  a: 6 عمليات حصاد (31.52 كغ، 171.72 يورو) سجّلها كلها الفني TEC-06 دون توقيع ثانٍ ولم تُشحن.
+  must_include: ["6", "31.52"]
+  cite: harvest-shipping-procedure.md §2
+
+- id: S08
+  lang: en
+  screen: Reconcile
+  intent: unmetered_feed
+  q: Was any feed used that we never bought?
+  a: Yes — AQ-02 was fed 7.308 kg of FEED-03 on 29 days in August with no purchase behind it, 13.89 EUR at list price.
+  must_include: ["7.308", "13.89"]
+  cite: supplier-invoice-controls.md §4
+
+- id: S09
+  lang: en
+  screen: Reconcile
+  intent: feed_biosecurity
+  follows: S08
+  q: Is that a biosecurity problem?
+  a: Yes — only feed from an approved supplier through a recorded purchase may enter a unit; quarantine the bag, stop feeding it, inform the owner.
+  must_include: []
+  cite: biosecurity-rules.md §3
+
+- id: S10    # colloquial
+  lang: ar
+  screen: Drift
+  intent: heatwave_aeration
+  q: قديش اشتغلت مضخة الهوا بوحدة الطماطم وقت موجة الحر؟
+  a: "عملت مضخة الهواء في AQ-03 بنسبة 60.4% من اليوم خلال موجة الحر مقابل 26.6% في حزيران، فوق حد 50% في 5 أيام."
+  must_include: ["60.4", "26.6"]
+  cite: pump-maintenance-sop.md §5
+
+- id: S11
+  lang: en
+  screen: Drift
+  intent: ph_drift_cause
+  q: Is the pH drift on AQ-04 a sensor problem or a chemistry problem?
+  a: A sensor problem — the lab measured pH 6.89 while the probe read 7.28; the decline between doses was unchanged; calibration on 21 August stepped it back.
+  must_include: ["6.89", "7.28"]
+  cite: sensor-calibration.md §3
+
+- id: S12
+  lang: ar
+  screen: Patterns
+  intent: sensor_dropouts
+  q: هل حدثت انقطاعات في الحساسات وهل تغيّر نتائج الانحراف؟
+  a: انقطاعان (AQ-02 في 13 حزيران 9 ساعات، AQ-04 في 6 آب 5 ساعات)؛ فجوات لا أصفار، فلم يرفع أي منهما إنذار انحراف.
+  must_include: ["9", "5"]
+  cite: sensor-calibration.md §4
+
+- id: S13
+  lang: en
+  screen: Overview
+  intent: harvest_and_sales
+  q: How much did the farm harvest and ship in August, and for how much?
+  a: 229.02 kg logged in 19 harvests, 210.17 kg shipped in 16 shipments for 1,008.49 EUR.
+  must_include: ["229.02", "210.17", "1,008.49"]
+  cite: harvest-shipping-procedure.md §5
+
+- id: S14
+  lang: ar
+  screen: Patterns
+  intent: technician_workload
+  q: أي فني أغلق أكبر عدد من أوامر العمل؟
+  a: الفني TEC-07 أغلق 30 أمر عمل من أصل 147.
+  must_include: ["30", "147"]
+  cite: pump-maintenance-sop.md §2
+
+- id: S15
+  lang: en
+  screen: Drift
+  intent: dosing_schedule
+  q: Why does the pH jump every Monday?
+  a: "The controller doses pH up every Monday at 08:00, +0.3 and never above 7.1 — a normal weekly sawtooth, not drift."
+  must_include: ["0.3", "7.1"]
+  cite: water-quality-sop.md §5
+
+- id: S16
+  lang: ar
+  screen: Documents
+  intent: held_invoice
+  q: لماذا أُوقفت الفاتورة INV-2026-0418؟
+  a: "سعرها 2.95 يورو/كغ مقابل 2.40 في أمر الشراء (+22.9%، خارج هامش 5%)، وهي من المورد SUP-007 غير المعتمد بدلاً من SUP-001."
+  must_include: ["2.95", "2.40"]
+  cite: supplier-invoice-controls.md §2
+
+- id: S17
+  lang: en
+  screen: Reconcile
+  intent: pump_failure_loss
+  q: How many kilograms did AQ-03 lose in the week after the pump failure, and what does the maintenance SOP say the response time should have been?
+  a: 9.80 kg (6.31 kg harvested on 20 July against 16.11 kg usual); the SOP says on site within 2 hours — the alert waited 113.2 hours.
+  must_include: ["9.80", "2", "113.2"]
+  cite: pump-maintenance-sop.md §3
+
+- id: S18
+  lang: ar
+  screen: Reconcile
+  intent: pump_failure
+  q: أي وحدة تعطلت مضختها ومتى؟
+  a: الوحدة AQ-03 من 12 إلى 17 تموز — أُمرت المضخة 555 مرة ولم يرتفع المستوى، وجاء أمر الإصلاح بعد 113.2 ساعة.
+  must_include: ["555"]
+  cite: pump-maintenance-sop.md §4
+
+- id: S19
+  lang: ar
+  screen: Reconcile
+  intent: pump_failure_loss
+  follows: S18
+  q: وكم كيلوغراماً كلّفنا ذلك؟
+  a: 9.80 كغ من الطماطم في الأسبوع التالي، أي 35.28 يورو.
+  must_include: ["9.80"]
+  cite: pump-maintenance-sop.md §3
+
+- id: S20    # colloquial
+  lang: en
+  screen: Patterns
+  intent: ghost_harvests
+  q: "Who's been logging harvests that never leave the building?"
+  a: TEC-06 — 6 harvests, 31.52 kg, none countersigned, none shipped.
+  must_include: ["6"]
+  cite: harvest-shipping-procedure.md §2
+
+- id: S21
+  lang: ar
+  screen: Overview
+  intent: open_alerts
+  q: هل جرت الاستجابة لكل التنبيهات في الوقت المحدد؟
+  a: لا — تنبيه واحد تأخرت الاستجابة له (AL-2026-0001 على AQ-03، 113.2 ساعة مقابل ساعتين)؛ صدر 16 تنبيهاً ولا يوجد مفتوح الآن.
+  must_include: ["113.2"]
+  cite: alert-escalation.md §2
+
+- id: S22
+  lang: ar
+  screen: Reconcile
+  intent: recon_exposure
+  q: كم المبلغ المعرّض للخطر في استثناءات المطابقة؟
+  a: 220.89 يورو و48.63 كغ عبر 8 استثناءات.
+  must_include: ["220.89"]
+  cite: data-dictionary.md §7
+
+- id: S23
+  lang: en
+  screen: Admin center
+  intent: decision_on_finding
+  q: Who approved that hold, and under which rule?
+  a: "The audit log's latest human decision — who, when and the KB section it rests on — or that none is recorded yet."
+  must_include: []
+  cite: alert-escalation.md §4
+
+- id: S24    # colloquial
+  lang: ar
+  screen: Overview
+  intent: farm_overview
+  q: قديش عنا سمك وقديش مساحة أحواض الزراعة؟
+  a: 97 سمكة على 83.0 م² من أحواض الزراعة في 4 وحدات.
+  must_include: ["97", "83.0"]
+  cite: data-dictionary.md §1
+
+- id: S25
+  lang: en
+  screen: Drift
+  intent: null
+  q: Which unit had the highest average water temperature in July?
+  a: AQ-03, 21.69 °C on average in July (telemetry.readings).
+  must_include: ["21.69"]
+  cite: null
+
+- id: S26
+  lang: ar
+  screen: Patterns
+  intent: null
+  q: كم أمر عمل سُجّل على الوحدة AQ-02 خلال الفترة كلها؟
+  a: 33 أمر عمل سُجّلت على الوحدة AQ-02 (maintenance.work_orders).
+  must_include: ["33"]
+  cite: null

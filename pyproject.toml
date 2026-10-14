@@ -61,8 +61,6 @@ markers = [
     "domain: needs the farm data, analytics and knowledge base (make mock kb)",
     "model: calls a live chat model through Ollama (skipped in CI)",
 ]
-# Phase 1 runs the harness tests only; phase 2 lands the farm data and drops this.
-addopts = "-m 'not domain'"
 
 [tool.importlinter]
 root_package = "new_horizons"
