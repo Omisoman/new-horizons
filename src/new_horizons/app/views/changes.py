@@ -1,4 +1,4 @@
-"""Changes — the deploys sojourner shipped to this app, read from the
+"""Changes — the deploys Sojourner shipped to this app, read from the
 same hash-chained audit log as every decision made here. A change reaches the
 app only after a developer agent built it in a sandbox, an operator agent tested
 and evaluated it, and a person approved it."""
@@ -26,11 +26,11 @@ except Exception as exc:                       # the page renders whatever the d
 
 U.page_header(
     tr("Changes.", "التغييرات."),
-    tr("What sojourner shipped to this app — each deploy built, tested, evaluated and "
+    tr("What Sojourner shipped to this app — each deploy built, tested, evaluated and "
        "approved by a person, read from the same audit chain as every decision here.",
-       "ما شحنه sojourner إلى هذا التطبيق — كل نشر بُني واختُبر وقُيّم واعتمده شخص، "
+       "ما شحنه Sojourner إلى هذا التطبيق — كل نشر بُني واختُبر وقُيّم واعتمده شخص، "
        "ويُقرأ من سلسلة التدقيق نفسها التي تحفظ كل قرار هنا."),
-    [U.chip(tr("Synthetic data", "بيانات تركيبية")), U.chip("sojourner", "strong"),
+    [U.chip(tr("Synthetic data", "بيانات تركيبية")), U.chip("Sojourner", "strong"),
      U.chip(tr(f"{len(rows)} deploy" + ("" if len(rows) == 1 else "s"), f"عمليات النشر: {len(rows)}"))])
 
 if error:

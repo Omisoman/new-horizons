@@ -803,7 +803,7 @@ FOOTER_MARKS = (  # (alt, dark file, light file, optical scale) in static/: corn
    # Light files carry gray ink (AC's from the website's brand assets, sojourner's from
    # scripts/brand-marks.py); the scale corrects equal ink area optically.
 MARK_AREA = 2200       # px² of ink per footer mark before its optical scale
-MARK_BOX = (120, 52)   # the most one mark may occupy inside its field
+MARK_BOX = (132, 52)   # the most one mark may occupy inside its field (a 9-letter wordmark needs ~130)
 
 
 def farm_logo(theme: str | None = None) -> Path:

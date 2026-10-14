@@ -90,7 +90,7 @@ equipment; the decision recorded here authorises action in the systems that do.
 ## 8. Changes to this application
 
 - The application is developed by a sandboxed developer agent and shipped by
-  an operator agent (sojourner). A change reaches this deployment only
+  an operator agent (Sojourner). A change reaches this deployment only
   after it has been built, tested and **approved by a person**.
 - Every approved deploy is an event in the same audit chain and is listed on
   the Changes page with who approved it and when.
