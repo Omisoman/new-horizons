@@ -4,7 +4,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .ruff_cache/
-.import_linter_cache/
 data/*
 !data/_seed/
 node_modules/
@@ -12,3 +11,10 @@ dist/
 .DS_Store
 *.log
 .streamlit/secrets.toml
+
+# local AI-tooling files: kept on disk, never tracked
+CLAUDE.md
+.claude/
+AGENTS.md
+.cursor/
+.import_linter_cache/

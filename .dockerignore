@@ -8,3 +8,7 @@ data
 **/.pytest_cache
 *.log
 .env
+CLAUDE.md
+.claude
+AGENTS.md
+.cursor
