@@ -43,7 +43,7 @@ dependencies = [
 reranker = ["sentence-transformers>=3.0"]
 
 [project.urls]
-Repository = "https://github.com/omarsoman/new-horizons"
+Repository = "https://github.com/Omisoman/new-horizons"
 
 [dependency-groups]
 dev = ["pytest>=8", "pytest-asyncio>=0.24", "import-linter>=2.1"]
