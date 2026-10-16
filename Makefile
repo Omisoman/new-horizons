@@ -68,7 +68,7 @@ lint:
 ## No client vocabulary anywhere in the repository (CI runs the same check). Each word
 ## carries a one-letter class so the pattern never matches its own definition. LICENSE
 ## is the verbatim MIT text (its warranty clause trips the check) — legal text, not ours.
-CLIENT_WORDS := j[i]co|jerusal[e]m|القد[س]|ins[u]r|cl[a]im|pol[i]cy|gar[a]ge|adjust[e]r|IB[A]N|tar[i]ff|J[O]D
+CLIENT_WORDS := j[i]co|j[e]rusal[e]m|القد[س]|ins[u]r|cl[a]im|pol[i]cy|gar[a]ge|adjust[e]r|IB[A]N|tar[i]ff|J[O]D
 client-free:
 	@! grep -rIinE "$(CLIENT_WORDS)" --exclude-dir=node_modules --exclude-dir=.venv \
 	  --exclude-dir=data --exclude-dir=dist --exclude-dir=.git --exclude=LICENSE . \
