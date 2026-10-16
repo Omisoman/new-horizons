@@ -1,7 +1,7 @@
 # new-horizons — one Makefile, all entry points.
 # Never run `make demo1` and Sojourner's tier stack together (16 GB budget).
 
-SHELL := /bin/zsh
+SHELL := /bin/bash
 UV    ?= uv
 PKG   := src/new_horizons
 COMPOSE := docker compose -f docker-compose.yml
