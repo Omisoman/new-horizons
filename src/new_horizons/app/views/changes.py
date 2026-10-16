@@ -84,7 +84,8 @@ lp = last["payload"] or {}
 evaluation = lp.get("evaluation") or {}
 U.stat_cards([
     (tr("Deploys", "عمليات النشر"), f"{len(rows)}", tr("approved and shipped", "معتمدة ومشحونة")),
-    (tr("Last deploy", "آخر نشر"), (lp.get("ref") or "—")[:12], _when(last["ts"])),
+    # git's short hash: twelve characters wrap inside a quarter-width card
+    (tr("Last deploy", "آخر نشر"), (lp.get("ref") or "—")[:7], _when(last["ts"])),
     (tr("Approved by", "اعتمده"), lp.get("approved_by") or "—",
      tr(f"task {str(lp.get('task_id') or '—')[:8]}", f"المهمة {str(lp.get('task_id') or '—')[:8]}")),
     (tr("Evaluation", "التقييم"),
