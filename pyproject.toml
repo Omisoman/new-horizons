@@ -1,6 +1,6 @@
 [project]
 name = "new-horizons"
-version = "0.1.0"
+version = "1.0.0"
 description = "Offline analytics agent for an aquaponics farm (Streamlit + LangGraph), and the shared agent harness"
 readme = "README.md"
 license = "MIT"

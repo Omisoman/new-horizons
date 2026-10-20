@@ -1020,88 +1020,6 @@ wheels = [
 ]
 
 [[package]]
-name = "new-horizons"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "chromadb" },
-    { name = "faker" },
-    { name = "httpx" },
-    { name = "langchain-core" },
-    { name = "langchain-openai" },
-    { name = "langgraph" },
-    { name = "langgraph-checkpoint-postgres" },
-    { name = "networkx" },
-    { name = "numpy" },
-    { name = "openai" },
-    { name = "pandas" },
-    { name = "pillow" },
-    { name = "plotly" },
-    { name = "psycopg", extra = ["binary", "pool"] },
-    { name = "pydantic" },
-    { name = "pyjwt" },
-    { name = "pymupdf" },
-    { name = "pytesseract" },
-    { name = "python-dotenv" },
-    { name = "pyyaml" },
-    { name = "scikit-learn" },
-    { name = "scipy" },
-    { name = "streamlit" },
-    { name = "surya-ocr" },
-    { name = "transformers" },
-]
-
-[package.optional-dependencies]
-reranker = [
-    { name = "sentence-transformers" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "import-linter" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "chromadb", specifier = ">=0.5" },
-    { name = "faker", specifier = ">=28" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "langchain-core", specifier = ">=0.3" },
-    { name = "langchain-openai", specifier = ">=0.2" },
-    { name = "langgraph", specifier = ">=0.2" },
-    { name = "langgraph-checkpoint-postgres", specifier = ">=2.0" },
-    { name = "networkx", specifier = ">=3.3" },
-    { name = "numpy", specifier = ">=1.26" },
-    { name = "openai", specifier = ">=1.40" },
-    { name = "pandas", specifier = ">=2.2" },
-    { name = "pillow", specifier = ">=10" },
-    { name = "plotly", specifier = ">=5.22" },
-    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2" },
-    { name = "pydantic", specifier = ">=2.8" },
-    { name = "pyjwt", specifier = ">=2.9" },
-    { name = "pymupdf", specifier = ">=1.24" },
-    { name = "pytesseract", specifier = ">=0.3.13" },
-    { name = "python-dotenv", specifier = ">=1.0" },
-    { name = "pyyaml", specifier = ">=6" },
-    { name = "scikit-learn", specifier = ">=1.5" },
-    { name = "scipy", specifier = ">=1.13" },
-    { name = "sentence-transformers", marker = "extra == 'reranker'", specifier = ">=3.0" },
-    { name = "streamlit", specifier = ">=1.38" },
-    { name = "surya-ocr", specifier = ">=0.8" },
-    { name = "transformers", specifier = ">=4.53,<5" },
-]
-provides-extras = ["reranker"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "import-linter", specifier = ">=2.1" },
-    { name = "pytest", specifier = ">=8" },
-    { name = "pytest-asyncio", specifier = ">=0.24" },
-]
-
-[[package]]
 name = "mdurl"
 version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1188,6 +1106,88 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6a/51/63fe664f3908c97be9d2e4f1158eb633317598cfa6e1fc14af5383f17512/networkx-3.6.1.tar.gz", hash = "sha256:26b7c357accc0c8cde558ad486283728b65b6a95d85ee1cd66bafab4c8168509", size = 2517025, upload-time = "2025-12-08T17:02:39.908Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9e/c9/b2622292ea83fbb4ec318f5b9ab867d0a28ab43c5717bb85b0a5f6b3b0a4/networkx-3.6.1-py3-none-any.whl", hash = "sha256:d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762", size = 2068504, upload-time = "2025-12-08T17:02:38.159Z" },
+]
+
+[[package]]
+name = "new-horizons"
+version = "1.0.0"
+source = { editable = "." }
+dependencies = [
+    { name = "chromadb" },
+    { name = "faker" },
+    { name = "httpx" },
+    { name = "langchain-core" },
+    { name = "langchain-openai" },
+    { name = "langgraph" },
+    { name = "langgraph-checkpoint-postgres" },
+    { name = "networkx" },
+    { name = "numpy" },
+    { name = "openai" },
+    { name = "pandas" },
+    { name = "pillow" },
+    { name = "plotly" },
+    { name = "psycopg", extra = ["binary", "pool"] },
+    { name = "pydantic" },
+    { name = "pyjwt" },
+    { name = "pymupdf" },
+    { name = "pytesseract" },
+    { name = "python-dotenv" },
+    { name = "pyyaml" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+    { name = "streamlit" },
+    { name = "surya-ocr" },
+    { name = "transformers" },
+]
+
+[package.optional-dependencies]
+reranker = [
+    { name = "sentence-transformers" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "import-linter" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "chromadb", specifier = ">=0.5" },
+    { name = "faker", specifier = ">=28" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "langchain-core", specifier = ">=0.3" },
+    { name = "langchain-openai", specifier = ">=0.2" },
+    { name = "langgraph", specifier = ">=0.2" },
+    { name = "langgraph-checkpoint-postgres", specifier = ">=2.0" },
+    { name = "networkx", specifier = ">=3.3" },
+    { name = "numpy", specifier = ">=1.26" },
+    { name = "openai", specifier = ">=1.40" },
+    { name = "pandas", specifier = ">=2.2" },
+    { name = "pillow", specifier = ">=10" },
+    { name = "plotly", specifier = ">=5.22" },
+    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2" },
+    { name = "pydantic", specifier = ">=2.8" },
+    { name = "pyjwt", specifier = ">=2.9" },
+    { name = "pymupdf", specifier = ">=1.24" },
+    { name = "pytesseract", specifier = ">=0.3.13" },
+    { name = "python-dotenv", specifier = ">=1.0" },
+    { name = "pyyaml", specifier = ">=6" },
+    { name = "scikit-learn", specifier = ">=1.5" },
+    { name = "scipy", specifier = ">=1.13" },
+    { name = "sentence-transformers", marker = "extra == 'reranker'", specifier = ">=3.0" },
+    { name = "streamlit", specifier = ">=1.38" },
+    { name = "surya-ocr", specifier = ">=0.8" },
+    { name = "transformers", specifier = ">=4.53,<5" },
+]
+provides-extras = ["reranker"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "import-linter", specifier = ">=2.1" },
+    { name = "pytest", specifier = ">=8" },
+    { name = "pytest-asyncio", specifier = ">=0.24" },
 ]
 
 [[package]]
